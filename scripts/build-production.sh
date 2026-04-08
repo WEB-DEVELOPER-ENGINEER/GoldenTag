@@ -98,15 +98,7 @@ fi
 cd ..
 
 # Summary
-echo ""
-echo "=========================================="
-echo "Build Summary"
-echo "=========================================="
-print_status "Backend built to: backend/dist/"
-print_status "Frontend built to: frontend/dist/"
-echo ""
-print_info "Next steps:"
-echo "  1. Configure production environment variables"
+
 echo "  2. Run database migrations: cd backend && npm run prisma:migrate:deploy"
 echo "  3. Deploy the built files to your production server"
 echo "  4. Start the backend: cd backend && npm run start:production"

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { BackgroundPresets, BackgroundPreset, BACKGROUND_PRESETS } from './BackgroundPresets';
 
 interface ThemeSettings {
   mode: 'light' | 'dark';
