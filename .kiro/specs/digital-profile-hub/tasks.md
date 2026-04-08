@@ -1,0 +1,408 @@
+# Implementation Plan
+
+- [x] 1. Set up project structure and dependencies
+  - Initialize Node.js backend with Express and TypeScript
+  - Initialize React frontend with TypeScript and Vite
+  - Configure PostgreSQL database connection
+  - Set up Prisma ORM with initial schema
+  - Configure environment variables for both frontend and backend
+  - Set up CORS, body parsing, and basic middleware
+  - _Requirements: All_
+
+- [x] 2. Implement database schema and models
+  - [x] 2.1 Create Prisma schema for all data models
+    - Define User, Profile, Theme, Link, Contact, File, and Popup models
+    - Set up relationships and constraints
+    - Configure indexes for performance
+    - _Requirements: 1.1, 2.1, 3.2, 4.4, 5.5, 8.5, 11.5, 12.2, 13.1, 14.1, 17.1, 18.1, 20.2_
+  - [x] 2.2 Run database migrations
+    - Generate and apply initial migration
+    - Verify schema creation
+    - _Requirements: 1.1, 2.1_
+  - [ ]* 2.3 Write property test for data model persistence
+    - **Property 6: Background preferences are applied and persisted**
+    - **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
+
+- [x] 3. Implement authentication system
+  - [x] 3.1 Create user registration endpoint
+    - Implement email/password validation
+    - Hash passwords using bcrypt
+    - Create user account in database
+    - Generate JWT token
+    - _Requirements: 1.1, 1.2, 1.5, 2.4_
+  - [x] 3.2 Write property test for registration
+    - **Property 1: Valid registration creates authenticated session**
+    - **Validates: Requirements 1.1, 1.4, 1.5**
+  - [x] 3.3 Write property test for password hashing
+    - **Property 3: Passwords are securely hashed**
+    - **Validates: Requirements 2.4**
+  - [x] 3.4 Create login endpoint
+    - Validate credentials
+    - Generate JWT token on success
+    - Return user data and token
+    - _Requirements: 2.1, 2.2, 2.5_
+  - [x] 3.5 Write property test for login validation
+    - **Property 2: Invalid credentials are rejected**
+    - **Validates: Requirements 2.2**
+  - [x] 3.6 Implement authentication middleware
+    - Verify JWT tokens
+    - Attach user to request object
+    - Handle expired tokens
+    - _Requirements: 2.3, 20.4_
+  - [ ]* 3.7 Write unit tests for authentication middleware
+    - Test token verification
+    - Test expired token handling
+    - Test missing token handling
+    - _Requirements: 2.3, 20.4_
+
+- [x] 4. Create profile management endpoints
+  - [x] 4.1 Implement profile creation on user registration
+    - Auto-create profile with default settings
+    - Generate unique profile URL
+    - _Requirements: 14.1, 14.2_
+  - [x] 4.2 Write property test for URL uniqueness
+    - **Property 22: Profile URLs are unique**
+    - **Validates: Requirements 14.1, 14.2, 14.3, 14.5**
+  - [x] 4.3 Create profile update endpoint
+    - Accept profile data (display name, bio)
+    - Validate and update profile
+    - _Requirements: 7.5, 14.5_
+  - [x] 4.4 Create custom URL slug endpoint
+    - Validate slug availability
+    - Update profile URL
+    - _Requirements: 14.4_
+  - [x] 4.5 Create public profile retrieval endpoint
+    - Fetch profile by username/slug
+    - Return all profile data for public display
+    - _Requirements: 14.3, 14.5_
+
+- [ ] 5. Implement file upload functionality
+  - [x] 5.1 Set up file storage service
+    - Configure storage on the vps (no s3 or cloud storage)
+    - Implement upload utility functions
+    - Add file type and size validation
+    - _Requirements: 3.1, 12.1, 20.3_
+  - [x] 5.2 Create profile picture upload endpoint
+    - Validate image file type and size
+    - Upload to storage
+    - Update profile with image URL
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+  - [x] 5.3 Create background image upload endpoint
+    - Validate and upload background image
+    - Optimize image for web display
+    - Update profile background settings
+    - _Requirements: 4.2, 4.5_
+  - [x] 5.4 Create PDF upload endpoint
+    - Validate PDF file type and size
+    - Scan for malicious content
+    - Upload to storage
+    - Create file record in database
+    - _Requirements: 12.1, 12.2, 12.3, 20.3_
+
+  - [x] 5.5 Create PDF deletion endpoint
+    - Delete file from storage
+    - Remove file record from database
+    - _Requirements: 12.5_
+
+- [x] 6. Implement theme customization endpoints
+  - [x] 6.1 Create theme update endpoint
+    - Accept theme settings (colors, fonts, layout)
+    - Validate color formats
+    - Update theme in database
+    - _Requirements: 5.1, 5.2, 5.3, 5.5_
+  - [x] 6.2 Create background settings endpoint
+    - Accept color or image background
+    - Update profile background settings
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [x] 6.3 Create light/dark mode toggle endpoint
+    - Toggle mode setting
+    - Return updated theme with appropriate colors
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+
+- [-] 7. Implement link management endpoints
+  - [x] 7.1 Create link creation endpoint
+    - Accept link data (type, platform, title, URL)
+    - Validate URL format
+    - Validate platform-specific formats
+    - Create link in database with order
+    - _Requirements: 8.1, 9.1, 9.3, 10.1, 10.2_
+  - [x] 7.2 Create link update endpoint
+    - Accept updated link data
+    - Validate and update link
+    - _Requirements: 8.2_
+  - [x] 7.3 Create link deletion endpoint
+    - Delete link from database
+    - _Requirements: 8.3_
+  - [x] 7.4 Create link reorder endpoint
+    - Accept new order array
+    - Update order for all links
+    - _Requirements: 8.4_
+
+- [x] 8. Implement contact information endpoints
+  - [x] 8.1 Create contact creation endpoint
+    - Validate phone/email format
+    - Accept optional label
+    - Create contact in database
+    - _Requirements: 11.1, 11.2, 11.3, 11.4_
+  - [x] 8.2 Create contact update endpoint
+    - Update contact information
+    - _Requirements: 11.3_
+  - [x] 8.3 Create contact deletion endpoint
+    - Delete contact from database
+    - _Requirements: 11.5_
+
+- [x] 9. Implement popup message endpoints
+  - [x] 9.1 Create popup settings endpoint
+    - Accept popup message and settings
+    - Store popup configuration
+    - _Requirements: 13.1_
+  - [x] 9.2 Create popup enable/disable endpoint
+    - Toggle popup visibility
+    - _Requirements: 13.3, 13.4_
+
+- [ ] 10. Implement QR code generation
+  - [x] 10.1 Create QR code generation endpoint
+    - Generate QR code from profile URL
+    - Return QR code as image
+    - _Requirements: 15.1, 15.2_
+  - [x] 10.2 Implement QR code regeneration on URL change
+    - Trigger regeneration when profile URL changes
+    - _Requirements: 15.4_
+
+- [x] 11. Implement admin panel endpoints
+  - [x] 11.1 Create admin authorization middleware
+    - Check user role for admin access
+    - Return 403 for non-admin users
+    - _Requirements: 17.5_
+  - [x] 11.2 Create user list endpoint
+    - Return paginated list of all users
+    - Include user metadata
+    - _Requirements: 17.1, 17.2_
+  - [x] 11.3 Create user detail endpoint
+    - Return detailed user information
+    - _Requirements: 17.3_
+  - [x] 11.4 Create user search/filter endpoint
+    - Accept search criteria
+    - Return filtered user list
+    - _Requirements: 17.4_
+  - [x] 11.5 Create user deactivation endpoint
+    - Set user account to inactive
+    - Log admin action
+    - _Requirements: 18.1, 18.2, 18.4_
+  - [x] 11.6 Create user reactivation endpoint
+    - Set user account to active
+    - Log admin action
+    - _Requirements: 18.3, 18.4_
+
+- [ ] 12. Checkpoint - Ensure all backend tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 13. Build frontend authentication components
+  - [x] 13.1 Create authentication context and provider
+    - Implement auth state management
+    - Handle token storage
+    - Provide login/logout functions
+    - _Requirements: 1.1, 2.1, 2.5_
+  - [x] 13.2 Create registration form component
+    - Build form with email/password inputs
+    - Add client-side validation
+    - Handle registration submission
+    - Display error messages
+    - _Requirements: 1.1, 1.2, 1.5_
+  - [x] 13.3 Create login form component
+    - Build form with email/password inputs
+    - Add client-side validation
+    - Handle login submission
+    - Display error messages
+    - _Requirements: 2.1, 2.2_
+  - [x] 13.4 Create protected route component
+    - Check authentication status
+    - Redirect to login if not authenticated
+    - _Requirements: 2.3_
+  - [ ]* 13.5 Write unit tests for auth components
+    - Test form validation
+    - Test submission handling
+    - Test error display
+    - _Requirements: 1.1, 2.1_
+
+- [x] 14. Build user dashboard components
+  - [x] 14.1 Create dashboard layout component
+    - Build main dashboard container
+    - Add navigation
+    - Include preview panel
+    - _Requirements: 7.4_
+  - [x] 14.2 Create profile editor component
+    - Build form for display name and bio
+    - Add save functionality
+    - _Requirements: 7.5_
+  - [x] 14.3 Create file upload components
+    - Build profile picture uploader
+    - Build background image uploader
+    - Build PDF uploader
+    - Add file validation
+    - Display upload progress
+    - _Requirements: 3.1, 3.2, 4.2, 12.1, 12.2_
+  - [x] 14.4 Create theme customizer component
+    - Build color pickers for theme colors
+    - Add font selection dropdown
+    - Add layout selection
+    - Add light/dark mode toggle
+    - _Requirements: 5.1, 5.2, 5.3, 6.1, 6.2_
+  - [ ]* 14.5 Write unit tests for dashboard components
+    - Test form submissions
+    - Test file upload handling
+    - Test theme updates
+    - _Requirements: 3.1, 5.1, 7.5_
+
+- [ ] 15. Build link management components
+  - [x] 15.1 Create link list component
+    - Display all user links
+    - Add drag-and-drop reordering
+    - Add edit/delete buttons
+    - _Requirements: 8.2, 8.3, 8.4_
+  - [x] 15.2 Create link creation form
+    - Add platform selection
+    - Add custom link option
+    - Validate URL input
+    - Display platform icons
+    - _Requirements: 8.1, 9.1, 9.2, 10.1_
+  - [x] 15.3 Create link edit modal
+    - Allow editing link details
+    - Validate changes
+    - _Requirements: 8.2_
+  - [ ]* 15.4 Write unit tests for link components
+    - Test link creation
+    - Test link editing
+    - Test link deletion
+    - Test reordering
+    - _Requirements: 8.1, 8.2, 8.3, 8.4_
+
+- [x] 16. Build contact and file management components
+  - [x] 16.1 Create contact management component
+    - Add form for phone/email input
+    - Add label selection
+    - Display contact list
+    - Add edit/delete functionality
+    - _Requirements: 11.1, 11.2, 11.3, 11.5_
+  - [x] 16.2 Create file list component
+    - Display uploaded PDFs
+    - Add download buttons
+    - Add delete functionality
+    - _Requirements: 12.3, 12.4, 12.5_
+  - [ ]* 16.3 Write unit tests for contact and file components
+    - Test contact creation
+    - Test file display
+    - Test deletion
+    - _Requirements: 11.1, 12.3_
+
+- [x] 17. Build popup editor component
+  - [x] 17.1 Create popup configuration form
+    - Add message input
+    - Add duration setting
+    - Add color customization
+    - Add enable/disable toggle
+    - _Requirements: 13.1, 13.2, 13.3, 13.4_
+  - [ ]* 17.2 Write unit tests for popup editor
+    - Test popup creation
+    - Test enable/disable
+    - _Requirements: 13.1, 13.3_
+
+- [x] 18. Build QR code component
+  - [x] 18.1 Create QR code display and download component
+    - Fetch QR code from API
+    - Display QR code image
+    - Add download button
+    - _Requirements: 15.1, 15.2_
+  - [ ]* 18.2 Write unit tests for QR code component
+    - Test QR code display
+    - Test download functionality
+    - _Requirements: 15.1, 15.2_
+
+- [-] 19. Build real-time preview component
+  - [x] 19.1 Create preview panel component
+    - Mirror profile page layout
+    - Subscribe to profile state changes
+    - Update preview in real-time
+    - _Requirements: 7.1, 7.2, 7.3_
+  - [x] 19.2 Write property test for preview updates
+    - **Property 9: Preview updates reflect all changes**
+    - **Validates: Requirements 7.1, 7.3**
+
+
+- [x] 20. Build public profile page
+  - [x] 20.1 Create public profile component
+    - Fetch profile data by username
+    - Display profile picture and background
+    - Apply theme styling
+    - Render links with icons
+    - Display contact information
+    - Show PDF downloads
+    - _Requirements: 3.2, 4.1, 4.2, 5.1, 8.1, 9.1, 10.3, 11.3, 12.3, 14.3_
+  - [x] 20.2 Create popup message component
+    - Display popup on page load
+    - Handle dismissal
+    - Apply duration settings
+    - _Requirements: 13.3, 13.5_
+  - [x] 20.3 Implement responsive design
+    - Add mobile-first CSS
+    - Test on various screen sizes
+    - Ensure touch-friendly interactions
+    - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5_
+  - [ ]* 20.5 Write unit tests for public profile
+    - Test profile data display
+    - Test link rendering
+    - Test popup display
+    - _Requirements: 14.3, 8.1, 13.3_
+
+- [x] 21. Build admin panel components
+  - [x] 21.1 Create admin dashboard layout
+    - Build admin navigation
+    - Add user list table
+    - _Requirements: 17.1_
+  - [x] 21.2 Create user list component
+    - Display paginated user table
+    - Show user metadata
+    - Add search/filter controls
+    - _Requirements: 17.1, 17.2, 17.4_
+  - [x] 21.3 Create user detail modal
+    - Display detailed user information
+    - Add deactivate/reactivate buttons
+    - Show admin action log
+    - _Requirements: 17.3, 18.1, 18.3, 18.4_
+  - [ ]* 21.4 Write unit tests for admin components
+    - Test user list display
+    - Test search functionality
+    - Test user actions
+    - _Requirements: 17.1, 17.4, 18.1_
+
+- [ ] 22. Implement security measures
+  - [ ] 22.1 Add input sanitization
+    - Sanitize all user inputs
+    - Prevent XSS attacks
+    - _Requirements: 20.5_
+  - [ ] 22.2 Add CSRF protection
+    - Implement CSRF tokens
+    - Validate tokens on state-changing requests
+    - _Requirements: 20.5_
+  - [ ] 22.3 Implement rate limiting
+    - Add rate limiting middleware
+    - Configure limits for different endpoints
+    - _Requirements: 2.2_
+- [ ] 23. Final checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 24. Set up deployment configuration
+  - [x] 24.1 Configure production environment
+    - Set up environment variables
+    - Configure database connection
+    - Set up file storage
+    - _Requirements: All_
+  - [x] 24.2 Add production build scripts
+    - Configure frontend build
+    - Configure backend build
+    - _Requirements: All_
+  - [x] 24.3 Create deployment documentation
+    - Document deployment process
+    - Document environment setup
+    - _Requirements: All_

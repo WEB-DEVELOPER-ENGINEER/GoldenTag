@@ -1,0 +1,27 @@
+[Unit]
+Description=Digital Profile Hub Backend API
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/digital-profile-hub/backend
+Environment="NODE_ENV=production"
+EnvironmentFile=/var/www/digital-profile-hub/backend/.env.production
+ExecStart=/usr/bin/node /var/www/digital-profile-hub/backend/dist/index.js
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/digital-profile-hub/app.log
+StandardError=append:/var/log/digital-profile-hub/error.log
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/digital-profile-hub/backend/uploads /var/log/digital-profile-hub
+
+[Install]
+WantedBy=multi-user.target

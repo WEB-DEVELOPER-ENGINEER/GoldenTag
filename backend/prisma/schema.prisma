@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  username     String    @unique
+  role         Role      @default(USER)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+  profile      Profile?
+
+  @@index([email])
+  @@index([username])
+}
+
+model Profile {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName          String
+  bio                  String?
+  avatarUrl            String?
+  backgroundType       BackgroundType @default(COLOR)
+  backgroundColor      String?
+  backgroundImageUrl   String?
+  isPublished          Boolean  @default(false)
+  viewCount            Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  theme                Theme?
+  links                Link[]
+  contacts             Contact[]
+  files                File[]
+  popup                Popup?
+
+  @@index([userId])
+}
+
+model Theme {
+  id            String   @id @default(uuid())
+  profileId     String   @unique
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  mode          ThemeMode @default(LIGHT)
+  primaryColor  String   @default("#3b82f6")
+  secondaryColor String  @default("#8b5cf6")
+  textColor     String   @default("#1f2937")
+  fontFamily    String   @default("Inter")
+  layout        Layout   @default(CENTERED)
+  buttonStyle   ButtonStyle @default(ROUNDED)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Link {
+  id         String   @id @default(uuid())
+  profileId  String
+  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type       LinkType
+  platform   String?
+  title      String
+  url        String
+  icon       String?
+  order      Int
+  isVisible  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([profileId])
+  @@index([order])
+}
+
+model Contact {
+  id        String      @id @default(uuid())
+  profileId String
+  profile   Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type      ContactType
+  value     String
+  label     String?
+  order     Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([profileId])
+}
+
+model File {
+  id           String   @id @default(uuid())
+  profileId    String
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  filename     String
+  originalName String
+  title        String
+  fileUrl      String
+  fileSize     Int
+  mimeType     String
+  order        Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([profileId])
+}
+
+model Popup {
+  id              String   @id @default(uuid())
+  profileId       String   @unique
+  profile         Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  isEnabled       Boolean  @default(false)
+  message         String
+  duration        Int?
+  backgroundColor String   @default("#3b82f6")
+  textColor       String   @default("#ffffff")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BackgroundType {
+  COLOR
+  IMAGE
+}
+
+enum ThemeMode {
+  LIGHT
+  DARK
+}
+
+enum Layout {
+  CENTERED
+  LEFT
+  RIGHT
+}
+
+enum ButtonStyle {
+  ROUNDED
+  SQUARE
+  PILL
+}
+
+enum LinkType {
+  PLATFORM
+  CUSTOM
+}
+
+enum ContactType {
+  EMAIL
+  PHONE
+}

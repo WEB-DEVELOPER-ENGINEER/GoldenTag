@@ -1,0 +1,15 @@
+// Production Prisma Schema Configuration
+// This extends the base schema with production-specific settings
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Note: The actual models are defined in schema.prisma
+// This file is for production-specific configuration only

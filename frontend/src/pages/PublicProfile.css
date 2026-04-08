@@ -1,0 +1,209 @@
+/* Mobile-first responsive design for public profile */
+
+/* Base styles for mobile (default) */
+.profile-container {
+  padding: 16px;
+  min-height: 100vh;
+}
+
+.profile-content {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 0 12px 0;
+}
+
+.profile-bio {
+  font-size: 14px;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.profile-link,
+.profile-file {
+  padding: 14px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  /* Ensure touch-friendly minimum size */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-contact {
+  padding: 12px 14px;
+  font-size: 13px;
+  border-radius: 6px;
+  /* Ensure touch-friendly minimum size */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.popup-message {
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.popup-close-btn {
+  padding: 4px 8px;
+  /* Ensure touch-friendly minimum size */
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tablet styles (768px and up) */
+@media (min-width: 768px) {
+  .profile-container {
+    padding: 24px;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border: 4px solid white;
+  }
+
+  .profile-title {
+    font-size: 32px;
+    margin: 0 0 16px 0;
+  }
+
+  .profile-bio {
+    font-size: 16px;
+    margin: 0 0 32px 0;
+    line-height: 1.6;
+  }
+
+  .profile-link,
+  .profile-file {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+
+  .profile-contact {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  .popup-message {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+}
+
+/* Desktop styles (1024px and up) */
+@media (min-width: 1024px) {
+  .profile-container {
+    padding: 32px;
+  }
+
+  .profile-avatar {
+    width: 140px;
+    height: 140px;
+  }
+
+  .profile-title {
+    font-size: 36px;
+  }
+
+  .profile-bio {
+    font-size: 18px;
+    margin: 0 0 40px 0;
+  }
+
+  /* Hover effects only on desktop */
+  .profile-link:hover,
+  .profile-file:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Large desktop styles (1440px and up) */
+@media (min-width: 1440px) {
+  .profile-container {
+    padding: 48px;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .profile-link:hover,
+  .profile-file:hover {
+    transform: none;
+  }
+
+  /* Add active state for touch feedback */
+  .profile-link:active,
+  .profile-file:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+
+  .popup-close-btn:active {
+    opacity: 0.6;
+  }
+}
+
+/* Ensure proper spacing on small screens */
+@media (max-width: 374px) {
+  .profile-container {
+    padding: 12px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-title {
+    font-size: 20px;
+  }
+
+  .profile-bio {
+    font-size: 13px;
+  }
+
+  .profile-link,
+  .profile-file {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+}
+
+/* Accessibility: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .profile-link,
+  .profile-file,
+  .popup-close-btn {
+    transition: none;
+  }
+
+  .profile-link:hover,
+  .profile-file:hover {
+    transform: none;
+  }
+}
