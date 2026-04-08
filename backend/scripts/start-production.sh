@@ -1,6 +1,10 @@
 #!/bin/bash
 
+# =============================================================================
 # Production Startup Script for Digital Profile Hub Backend
+# =============================================================================
+# Port: 3003 (to avoid conflicts with other apps on the VPS)
+# =============================================================================
 
 set -e
 
@@ -16,6 +20,9 @@ fi
 # Load environment variables
 export NODE_ENV=production
 source .env.production
+
+# Ensure PORT is set to 3003
+export PORT=${PORT:-3003}
 
 # Check if node_modules exists
 if [ ! -d "node_modules" ]; then

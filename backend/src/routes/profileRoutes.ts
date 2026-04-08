@@ -309,7 +309,7 @@ router.delete('/me/background', authenticate, async (req: Request, res: Response
       req.user.userId,
       'COLOR',
       '#ffffff',
-      null
+      undefined
     );
 
     res.status(200).json(updatedProfile);
