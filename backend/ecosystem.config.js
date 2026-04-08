@@ -6,7 +6,7 @@ module.exports = {
     {
       name: 'profile-hub-api',
       script: './dist/index.js',
-      cwd: '/var/www/profile-hub/backend',
+      cwd: '/var/www/GoldenTag/backend',
       instances: 1,
       exec_mode: 'fork',
       env: {
@@ -14,9 +14,9 @@ module.exports = {
         PORT: 3003,
       },
       env_file: '.env.production',
-      error_file: '/var/www/profile-hub/logs/pm2-error.log',
-      out_file: '/var/www/profile-hub/logs/pm2-out.log',
-      log_file: '/var/www/profile-hub/logs/pm2-combined.log',
+      error_file: '/var/www/GoldenTag/logs/pm2-error.log',
+      out_file: '/var/www/GoldenTag/logs/pm2-out.log',
+      log_file: '/var/www/GoldenTag/logs/pm2-combined.log',
       time: true,
       autorestart: true,
       max_restarts: 10,

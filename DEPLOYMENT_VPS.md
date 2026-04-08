@@ -5,10 +5,13 @@ This guide covers deploying the Digital Profile Hub on a VPS that already hosts 
 ## Configuration Summary
 
 - **Backend Port**: 3003 (avoiding conflicts with rasheqa:3001 and fitness-funnel:3002)
+- **HTTP Port**: 9080 (nginx)
+- **HTTPS Port**: 9443 (nginx)
 - **Deploy Path**: `/var/www/profile-hub`
 - **PM2 App Name**: `profile-hub-api`
-- **Database**: PostgreSQL (separate database: `profile_hub`)
-- **Process Manager**: PM2 (like your other apps)
+- **Database**: PostgreSQL (database: `golden_tag`)
+- **Process Manager**: PM2
+- **Access URL**: `https://91.108.113.135:9443`
 
 ## Prerequisites
 
@@ -17,7 +20,7 @@ Your VPS should already have:
 - PostgreSQL
 - Nginx
 - PM2 (for process management)
-- Certbot (for SSL certificates)
+- OpenSSL (for SSL certificates)
 
 ## Step 1: Prepare Local Environment
 
