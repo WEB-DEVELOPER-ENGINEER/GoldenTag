@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { AppError } from '../middleware/errorHandler';
 import { 
   isValidHexColor, 
+  isValidBackgroundColor,
   isValidFontFamily, 
   isValidLayout, 
   isValidButtonStyle,
@@ -167,8 +168,8 @@ export const updateBackgroundSettings = async (
   }
 
   // Validate color if provided
-  if (backgroundType === 'COLOR' && backgroundColor && !isValidHexColor(backgroundColor)) {
-    throw new AppError(400, 'INVALID_COLOR', 'Background color must be a valid hex color');
+  if (backgroundType === 'COLOR' && backgroundColor && !isValidBackgroundColor(backgroundColor)) {
+    throw new AppError(400, 'INVALID_COLOR', 'Background color must be a valid hex color or CSS gradient');
   }
 
   // Update profile background settings

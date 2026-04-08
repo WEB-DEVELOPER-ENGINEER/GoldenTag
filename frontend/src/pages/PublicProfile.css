@@ -1,209 +1,313 @@
-/* Mobile-first responsive design for public profile */
+/* Premium Mobile-First Public Profile Design */
 
-/* Base styles for mobile (default) */
+/* Base Container */
 .profile-container {
-  padding: 16px;
   min-height: 100vh;
+  padding: 1rem;
+  position: relative;
 }
 
+/* Content Wrapper */
 .profile-content {
   width: 100%;
-  max-width: 600px;
+  max-width: 480px;
   margin: 0 auto;
+  padding: 2rem 0;
 }
 
+/* Avatar with Premium Shadow */
 .profile-avatar {
-  width: 96px;
-  height: 96px;
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* Typography */
 .profile-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 0 0 12px 0;
+  font-size: 1.875rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .profile-bio {
-  font-size: 14px;
-  margin: 0 0 24px 0;
-  line-height: 1.5;
+  font-size: 1rem;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+  opacity: 0.85;
 }
 
+/* Premium Link Buttons */
 .profile-link,
 .profile-file {
-  padding: 14px 16px;
-  font-size: 14px;
-  border-radius: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  /* Ensure touch-friendly minimum size */
-  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 56px;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
 }
 
+.profile-link::before,
+.profile-file::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.profile-link:hover::before,
+.profile-file:hover::before {
+  opacity: 1;
+}
+
+/* Contact Cards */
 .profile-contact {
-  padding: 12px 14px;
-  font-size: 13px;
-  border-radius: 6px;
-  /* Ensure touch-friendly minimum size */
-  min-height: 44px;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  border-radius: 0.875rem;
+  min-height: 52px;
   display: flex;
   align-items: center;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Premium Popup */
 .popup-message {
-  padding: 14px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  border-radius: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .popup-close-btn {
-  padding: 4px 8px;
-  /* Ensure touch-friendly minimum size */
+  padding: 0.5rem;
   min-width: 44px;
   min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
 }
 
-/* Tablet styles (768px and up) */
+.popup-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Section Headers */
+.section-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+/* Tablet (768px+) */
 @media (min-width: 768px) {
   .profile-container {
-    padding: 24px;
+    padding: 2rem;
+  }
+
+  .profile-content {
+    max-width: 520px;
+    padding: 3rem 0;
   }
 
   .profile-avatar {
-    width: 120px;
-    height: 120px;
-    border: 4px solid white;
+    width: 128px;
+    height: 128px;
+    border: 5px solid rgba(255, 255, 255, 0.95);
   }
 
   .profile-title {
-    font-size: 32px;
-    margin: 0 0 16px 0;
+    font-size: 2.25rem;
+    margin-bottom: 1rem;
   }
 
   .profile-bio {
-    font-size: 16px;
-    margin: 0 0 32px 0;
-    line-height: 1.6;
+    font-size: 1.125rem;
+    margin-bottom: 2.5rem;
   }
 
   .profile-link,
   .profile-file {
-    padding: 16px 20px;
-    font-size: 16px;
+    padding: 1.125rem 1.75rem;
+    font-size: 1rem;
+    min-height: 60px;
+    border-radius: 1.125rem;
   }
 
   .profile-contact {
-    padding: 14px 16px;
-    font-size: 14px;
+    padding: 1.125rem 1.5rem;
+    font-size: 0.9375rem;
+    min-height: 56px;
   }
 
   .popup-message {
-    padding: 16px;
-    margin-bottom: 24px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
   }
 }
 
-/* Desktop styles (1024px and up) */
+/* Desktop (1024px+) */
 @media (min-width: 1024px) {
   .profile-container {
-    padding: 32px;
+    padding: 3rem;
+  }
+
+  .profile-content {
+    max-width: 560px;
+    padding: 4rem 0;
   }
 
   .profile-avatar {
-    width: 140px;
-    height: 140px;
+    width: 144px;
+    height: 144px;
   }
 
   .profile-title {
-    font-size: 36px;
+    font-size: 2.5rem;
   }
 
   .profile-bio {
-    font-size: 18px;
-    margin: 0 0 40px 0;
+    font-size: 1.25rem;
+    margin-bottom: 3rem;
   }
 
-  /* Hover effects only on desktop */
+  /* Hover effects for desktop */
   .profile-link:hover,
   .profile-file:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.15),
+      0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-contact:hover {
+    transform: translateX(4px);
   }
 }
 
-/* Large desktop styles (1440px and up) */
-@media (min-width: 1440px) {
-  .profile-container {
-    padding: 48px;
-  }
-}
-
-/* Touch-friendly interactions */
+/* Touch devices - Active states */
 @media (hover: none) and (pointer: coarse) {
-  /* Remove hover effects on touch devices */
   .profile-link:hover,
   .profile-file:hover {
     transform: none;
   }
 
-  /* Add active state for touch feedback */
   .profile-link:active,
   .profile-file:active {
-    opacity: 0.8;
-    transform: scale(0.98);
+    transform: scale(0.97);
+    opacity: 0.9;
   }
 
   .popup-close-btn:active {
-    opacity: 0.6;
+    transform: scale(0.9);
   }
 }
 
-/* Ensure proper spacing on small screens */
+/* Small screens (< 375px) */
 @media (max-width: 374px) {
   .profile-container {
-    padding: 12px;
+    padding: 0.75rem;
   }
 
   .profile-avatar {
-    width: 80px;
-    height: 80px;
+    width: 96px;
+    height: 96px;
   }
 
   .profile-title {
-    font-size: 20px;
+    font-size: 1.625rem;
   }
 
   .profile-bio {
-    font-size: 13px;
+    font-size: 0.9375rem;
   }
 
   .profile-link,
   .profile-file {
-    padding: 12px 14px;
-    font-size: 13px;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.875rem;
+    min-height: 52px;
   }
 }
 
-/* Accessibility: Respect user's motion preferences */
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .profile-link,
   .profile-file,
-  .popup-close-btn {
+  .profile-contact,
+  .profile-avatar,
+  .popup-message {
     transition: none;
+    animation: none;
   }
 
   .profile-link:hover,
   .profile-file:hover {
     transform: none;
   }
+}
+
+/* Custom scrollbar for webkit browsers */
+.profile-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profile-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.profile-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }

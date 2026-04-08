@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { BackgroundPresets, BackgroundPreset, BACKGROUND_PRESETS } from './BackgroundPresets';
 
 interface ThemeSettings {
   mode: 'light' | 'dark';
@@ -57,6 +58,21 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Update theme when currentTheme prop changes
+  React.useEffect(() => {
+    if (currentTheme) {
+      setTheme({
+        mode: currentTheme.mode || 'light',
+        primaryColor: currentTheme.primaryColor || '#3B82F6',
+        secondaryColor: currentTheme.secondaryColor || '#10B981',
+        textColor: currentTheme.textColor || '#1F2937',
+        fontFamily: currentTheme.fontFamily || 'Inter, sans-serif',
+        layout: currentTheme.layout || 'centered',
+        buttonStyle: currentTheme.buttonStyle || 'rounded',
+      });
+    }
+  }, [currentTheme]);
+
   const handleThemeChange = (key: keyof ThemeSettings, value: string) => {
     setTheme(prev => ({ ...prev, [key]: value }));
   };
@@ -104,6 +120,17 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
     setSuccessMessage(null);
 
     try {
+      // Transform theme data to match backend expectations
+      const themeData = {
+        mode: theme.mode.toUpperCase(),
+        primaryColor: theme.primaryColor,
+        secondaryColor: theme.secondaryColor,
+        textColor: theme.textColor,
+        fontFamily: theme.fontFamily.split(',')[0].trim(), // Remove ', sans-serif' part
+        layout: theme.layout.toUpperCase(),
+        buttonStyle: theme.buttonStyle.toUpperCase(),
+      };
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/profiles/me/theme`,
         {
@@ -112,7 +139,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify(theme),
+          body: JSON.stringify(themeData),
         }
       );
 

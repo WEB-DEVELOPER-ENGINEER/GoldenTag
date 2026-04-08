@@ -8,15 +8,24 @@ interface ProfileData {
 
 interface ProfileEditorProps {
   onProfileUpdate?: (profile: ProfileData) => void;
+  initialData?: ProfileData;
 }
 
-export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate }) => {
+export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, initialData }) => {
   const { token } = useAuth();
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
+  const [displayName, setDisplayName] = useState(initialData?.displayName || '');
+  const [bio, setBio] = useState(initialData?.bio || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Update form when initialData changes
+  React.useEffect(() => {
+    if (initialData) {
+      setDisplayName(initialData.displayName || '');
+      setBio(initialData.bio || '');
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,12 +76,12 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate })
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile Information</h2>
+      <h2 className="text-2xl font-bold text-ink-900 mb-6 tracking-tight">Profile Information</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Display Name Field */}
         <div>
-          <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="displayName" className="block text-sm font-semibold text-ink-900 mb-2.5">
             Display Name
           </label>
           <input
@@ -80,7 +89,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate })
             id="displayName"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="input"
             placeholder="Your name"
             required
           />
@@ -88,7 +97,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate })
 
         {/* Bio Field */}
         <div>
-          <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="bio" className="block text-sm font-semibold text-ink-900 mb-2.5">
             Bio
           </label>
           <textarea
@@ -96,25 +105,25 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate })
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="input resize-none"
             placeholder="Tell visitors about yourself..."
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-ink-500 mt-2.5 font-medium">
             {bio.length} characters
           </p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
+            <p className="text-sm text-red-700 font-medium">{error}</p>
           </div>
         )}
 
         {/* Success Message */}
         {successMessage && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-sm text-green-600">{successMessage}</p>
+          <div className="p-4 bg-sage-50 border border-sage-100 rounded-xl">
+            <p className="text-sm text-sage-700 font-medium">{successMessage}</p>
           </div>
         )}
 
@@ -122,7 +131,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate })
         <button
           type="submit"
           disabled={isLoading || !displayName.trim()}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary w-full"
         >
           {isLoading ? 'Saving...' : 'Save Profile'}
         </button>

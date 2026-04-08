@@ -90,114 +90,130 @@ export const QRCodeGenerator: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">QR Code</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Share your profile with a scannable QR code. Perfect for business cards, posters, or digital displays.
-        </p>
+    <div>
+      <h2 className="text-2xl font-bold text-ink-900 mb-3 tracking-tight">QR Code</h2>
+      <p className="text-sm text-ink-600 mb-6 leading-relaxed">
+        Share your profile with a scannable QR code. Perfect for business cards, posters, or digital displays.
+      </p>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-3"></div>
-              <p className="text-sm text-gray-600">Generating QR code...</p>
-            </div>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center p-12 bg-ink-50 rounded-2xl border border-ink-200">
+          <div className="text-center">
+            <div className="spinner w-12 h-12 mx-auto mb-4"></div>
+            <p className="text-sm text-ink-600 font-medium">Generating QR code...</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Error State */}
-        {error && !isLoading && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600 mb-3">{error}</p>
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
+          <p className="text-sm text-red-700 font-medium mb-3">{error}</p>
+          <button
+            onClick={handleRefresh}
+            className="btn-secondary text-sm"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+
+      {/* QR Code Display */}
+      {qrCodeDataUrl && !isLoading && (
+        <div className="space-y-6">
+          <div className="flex justify-center p-8 bg-white rounded-2xl border border-ink-200 shadow-elevation-1">
+            <img
+              src={qrCodeDataUrl}
+              alt="Profile QR Code"
+              className="w-full max-w-[256px] h-auto"
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className="btn-primary flex-1 flex items-center justify-center gap-2"
+            >
+              {isDownloading ? (
+                <>
+                  <div className="spinner w-4 h-4"></div>
+                  <span>Downloading...</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  <span>Download QR Code</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={handleRefresh}
-              className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
+              disabled={isLoading}
+              className="btn-secondary flex items-center justify-center gap-2 sm:w-auto"
+              title="Refresh QR code"
             >
-              Try Again
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              <span className="sm:hidden">Refresh</span>
             </button>
           </div>
-        )}
 
-        {/* QR Code Display */}
-        {qrCodeDataUrl && !isLoading && (
-          <div className="space-y-4">
-            <div className="flex justify-center p-6 bg-white rounded-lg border-2 border-gray-200">
-              <img
-                src={qrCodeDataUrl}
-                alt="Profile QR Code"
-                className="w-64 h-64"
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-              >
-                {isDownloading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Downloading...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
-                    <span>Download QR Code</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={handleRefresh}
-                disabled={isLoading}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:bg-gray-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                title="Refresh QR code"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Usage Instructions */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">How to use:</h3>
-              <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                <li>Download the QR code and add it to your business cards or marketing materials</li>
-                <li>Display it at events or on digital screens</li>
-                <li>Anyone can scan it with their phone camera to visit your profile</li>
-                <li>The QR code automatically updates when you change your profile URL</li>
-              </ul>
-            </div>
+          {/* Usage Instructions */}
+          <div className="p-5 bg-gold-50 border border-gold-100 rounded-xl">
+            <h3 className="text-sm font-bold text-ink-900 mb-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-gold-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              How to use
+            </h3>
+            <ul className="text-sm text-ink-700 space-y-2 leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-gold-600 mt-0.5">•</span>
+                <span>Download and add to business cards or marketing materials</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-gold-600 mt-0.5">•</span>
+                <span>Display at events or on digital screens</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-gold-600 mt-0.5">•</span>
+                <span>Anyone can scan with their phone camera to visit your profile</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-gold-600 mt-0.5">•</span>
+                <span>Updates automatically when you change your profile URL</span>
+              </li>
+            </ul>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

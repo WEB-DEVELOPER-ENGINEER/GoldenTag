@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSocialIcon } from '../utils/socialIcons';
 
 interface ThemeSettings {
   mode: 'light' | 'dark';
@@ -98,14 +99,21 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
   const getBackgroundStyle = () => {
     if (profileData.backgroundType === 'image' && profileData.backgroundImageUrl) {
       return {
-        backgroundImage: `url(${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${profileData.backgroundImageUrl})`,
+        backgroundImage: `url(${profileData.backgroundImageUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       };
     } else if (profileData.backgroundType === 'color' && profileData.backgroundColor) {
-      return {
-        backgroundColor: profileData.backgroundColor,
-      };
+      // Check if it's a gradient or solid color
+      if (profileData.backgroundColor.includes('gradient')) {
+        return {
+          background: profileData.backgroundColor,
+        };
+      } else {
+        return {
+          backgroundColor: profileData.backgroundColor,
+        };
+      }
     } else {
       return {
         backgroundColor: theme.mode === 'dark' ? '#1F2937' : '#F9FAFB',
@@ -171,7 +179,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       {profileData.avatarUrl && (
         <div style={{ marginBottom: '16px' }}>
           <img
-            src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${profileData.avatarUrl}`}
+            src={profileData.avatarUrl}
             alt="Profile"
             style={{
               width: '96px',
@@ -226,7 +234,9 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  display: 'block',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   padding: '12px 16px',
                   backgroundColor: theme.primaryColor,
                   color: 'white',
@@ -240,6 +250,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
                 onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
+                {getSocialIcon(link.platform)}
                 {link.title}
               </a>
             ))}
@@ -284,7 +295,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
             {sortedFiles.map((file) => (
               <a
                 key={file.id}
-                href={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${file.fileUrl}`}
+                href={file.fileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

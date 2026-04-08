@@ -42,6 +42,26 @@ export const isValidHexColor = (color: string): boolean => {
   return hexColorRegex.test(color);
 };
 
+export const isValidBackgroundColor = (color: string): boolean => {
+  // Accept hex colors
+  if (isValidHexColor(color)) {
+    return true;
+  }
+  
+  // Accept CSS gradients (linear-gradient, radial-gradient, etc.)
+  if (color.includes('gradient')) {
+    return true;
+  }
+  
+  // Accept CSS url() patterns (for SVG backgrounds)
+  if (color.includes('url(')) {
+    return true;
+  }
+  
+  // Accept CSS color names and other valid CSS color formats
+  return false;
+};
+
 export const isValidFontFamily = (font: string): boolean => {
   // List of allowed font families
   const allowedFonts = [

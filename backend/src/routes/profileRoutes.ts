@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { authenticate } from '../middleware/authMiddleware';
 import { 
   updateProfile, 
@@ -16,6 +17,42 @@ import { uploadProfilePicture, uploadBackgroundImage } from '../config/multer';
 import { validateImageFile } from '../utils/fileStorage';
 
 const router = Router();
+const prisma = new PrismaClient();
+
+// GET /api/profiles/me - Get own profile data
+router.get('/me', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required'
+        }
+      });
+    }
+
+    // Get user to find username
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: { username: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+
+    const profileData = await getProfileByUsername(user.username);
+
+    res.status(200).json(profileData);
+  } catch (error) {
+    next(error);
+  }
+});
 
 // PUT /api/profiles/me - Update own profile
 router.put('/me', authenticate, async (req: Request, res: Response, next: NextFunction) => {
@@ -247,6 +284,32 @@ router.put('/me/background', authenticate, async (req: Request, res: Response, n
       backgroundType,
       backgroundColor,
       backgroundImageUrl
+    );
+
+    res.status(200).json(updatedProfile);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/profiles/me/background - Remove background image
+router.delete('/me/background', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required'
+        }
+      });
+    }
+
+    // Reset to default white background
+    const updatedProfile = await updateBackgroundSettings(
+      req.user.userId,
+      'COLOR',
+      '#ffffff',
+      null
     );
 
     res.status(200).json(updatedProfile);

@@ -127,7 +127,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({ type, onUploadSuccess, c
 
           // Notify parent component
           if (onUploadSuccess) {
-            const fileUrl = response.avatarUrl || response.backgroundImageUrl || response.fileUrl;
+            // Handle different response structures
+            let fileUrl: string;
+            if (type === 'avatar') {
+              fileUrl = response.avatarUrl;
+            } else if (type === 'background') {
+              fileUrl = response.backgroundImageUrl;
+            } else {
+              fileUrl = response.fileUrl;
+            }
             onUploadSuccess(fileUrl);
           }
 
