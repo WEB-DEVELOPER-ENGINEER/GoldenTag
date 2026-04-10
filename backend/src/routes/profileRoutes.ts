@@ -129,6 +129,11 @@ router.get('/:username', async (req: Request, res: Response, next: NextFunction)
 // POST /api/profiles/me/avatar - Upload profile picture
 router.post('/me/avatar', authenticate, uploadProfilePicture.single('avatar'), async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log('=== AVATAR UPLOAD DEBUG ===');
+    console.log('req.file:', req.file);
+    console.log('req.body:', req.body);
+    console.log('Content-Type:', req.headers['content-type']);
+    
     if (!req.user) {
       return res.status(401).json({
         error: {
@@ -139,6 +144,7 @@ router.post('/me/avatar', authenticate, uploadProfilePicture.single('avatar'), a
     }
 
     if (!req.file) {
+      console.log('ERROR: No file in request');
       return res.status(400).json({
         error: {
           code: 'NO_FILE',
@@ -146,6 +152,8 @@ router.post('/me/avatar', authenticate, uploadProfilePicture.single('avatar'), a
         }
       });
     }
+    
+    console.log('File received:', req.file.filename, 'Size:', req.file.size);
 
     // Validate file type and size
     const validation = validateImageFile(req.file.mimetype, req.file.size);
