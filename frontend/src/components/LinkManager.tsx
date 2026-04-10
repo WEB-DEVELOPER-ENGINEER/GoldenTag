@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LinkList } from './LinkList';
 import { LinkCreationForm } from './LinkCreationForm';
 import { LinkEditModal } from './LinkEditModal';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface Link {
   id: string;
@@ -19,6 +20,7 @@ interface LinkManagerProps {
 }
 
 export const LinkManager: React.FC<LinkManagerProps> = ({ onLinksChange }) => {
+  const { t } = useTranslation();
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -55,7 +57,7 @@ export const LinkManager: React.FC<LinkManagerProps> = ({ onLinksChange }) => {
 
       {/* Link List */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Links</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('links.title')}</h2>
         <LinkList
           key={refreshKey}
           onEditLink={handleEditLink}

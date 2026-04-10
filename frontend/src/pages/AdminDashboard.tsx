@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserList, SearchFilters } from '../components/UserList';
 import { UserDetailModal } from '../components/UserDetailModal';
+import { LanguageSelector } from '../components/LanguageSelector';
 
 interface User {
   id: string;
@@ -144,6 +145,11 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <LanguageSelector 
+                variant="dropdown" 
+                showFlags={true} 
+                showLabels={false}
+              />
               <span className="text-sm text-gray-600">
                 {user?.username} (Admin)
               </span>

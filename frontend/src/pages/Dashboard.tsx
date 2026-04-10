@@ -10,10 +10,12 @@ import { PopupEditor } from '../components/PopupEditor';
 import { QRCodeGenerator } from '../components/QRCodeGenerator';
 import { BackgroundCustomizer } from '../components/BackgroundCustomizer';
 import { PreviewPanel } from '../components/PreviewPanel';
+import { useTranslation } from '../hooks/useTranslation';
 
 type TabType = 'profile' | 'uploads' | 'background' | 'theme' | 'links' | 'contacts' | 'popup' | 'qrcode';
 
 export const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
@@ -245,7 +247,7 @@ export const Dashboard: React.FC = () => {
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
             <div className="spinner w-12 h-12 mx-auto mb-4"></div>
-            <p className="text-neutral-600 font-medium">Loading your profile...</p>
+            <p className="text-neutral-600 font-medium">{t('dashboard.loading_profile')}</p>
           </div>
         </div>
       ) : (
@@ -256,14 +258,14 @@ export const Dashboard: React.FC = () => {
             <div className="sm:hidden overflow-x-auto scrollbar-hide">
               <nav className="flex gap-2 px-6 pb-4 border-b border-ink-200">
                 {[
-                  { id: 'profile', label: 'Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-                  { id: 'links', label: 'Links', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
-                  { id: 'contacts', label: 'Contacts', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-                  { id: 'uploads', label: 'Uploads', icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12' },
-                  { id: 'background', label: 'Background', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-                  { id: 'theme', label: 'Theme', icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01' },
-                  { id: 'popup', label: 'Popup', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z' },
-                  { id: 'qrcode', label: 'QR Code', icon: 'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z' },
+                  { id: 'profile', label: t('dashboard.tabs.profile'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+                  { id: 'links', label: t('dashboard.tabs.links'), icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
+                  { id: 'contacts', label: t('dashboard.tabs.contacts'), icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+                  { id: 'uploads', label: t('dashboard.tabs.uploads'), icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12' },
+                  { id: 'background', label: t('dashboard.tabs.background'), icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
+                  { id: 'theme', label: t('dashboard.tabs.theme'), icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01' },
+                  { id: 'popup', label: t('dashboard.tabs.popup'), icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z' },
+                  { id: 'qrcode', label: t('dashboard.tabs.qrcode'), icon: 'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -286,14 +288,14 @@ export const Dashboard: React.FC = () => {
             {/* Desktop: Standard Tabs */}
             <nav className="hidden sm:flex gap-1 border-b border-ink-200 overflow-x-auto scrollbar-hide">
               {[
-                { id: 'profile', label: 'Profile' },
-                { id: 'links', label: 'Links' },
-                { id: 'contacts', label: 'Contacts' },
-                { id: 'uploads', label: 'Uploads' },
-                { id: 'background', label: 'Background' },
-                { id: 'theme', label: 'Theme' },
-                { id: 'popup', label: 'Popup' },
-                { id: 'qrcode', label: 'QR Code' },
+                { id: 'profile', label: t('dashboard.tabs.profile') },
+                { id: 'links', label: t('dashboard.tabs.links') },
+                { id: 'contacts', label: t('dashboard.tabs.contacts') },
+                { id: 'uploads', label: t('dashboard.tabs.uploads') },
+                { id: 'background', label: t('dashboard.tabs.background') },
+                { id: 'theme', label: t('dashboard.tabs.theme') },
+                { id: 'popup', label: t('dashboard.tabs.popup') },
+                { id: 'qrcode', label: t('dashboard.tabs.qrcode') },
               ].map((tab) => (
                 <button
                   key={tab.id}

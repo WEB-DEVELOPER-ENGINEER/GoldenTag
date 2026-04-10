@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
+import { LanguageSelector } from './LanguageSelector';
 
 interface FormErrors {
   email?: string;
@@ -17,21 +19,22 @@ export const LoginForm: React.FC = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const validateEmail = (email: string): string | undefined => {
     if (!email) {
-      return 'Email is required';
+      return t('auth.login.email_required');
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return 'Please enter a valid email address';
+      return t('auth.login.email_invalid');
     }
     return undefined;
   };
 
   const validatePassword = (password: string): string | undefined => {
     if (!password) {
-      return 'Password is required';
+      return t('auth.login.password_required');
     }
     return undefined;
   };
@@ -59,7 +62,7 @@ export const LoginForm: React.FC = () => {
       navigate('/dashboard');
     } catch (error) {
       setErrors({
-        general: error instanceof Error ? error.message : 'Login failed. Please check your credentials.',
+        general: error instanceof Error ? error.message : t('auth.login.login_failed'),
       });
     } finally {
       setIsSubmitting(false);
@@ -68,6 +71,22 @@ export const LoginForm: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-ink-50 bg-gradient-mesh relative overflow-hidden">
+      {/* Language Selector - Fixed position at top end (RTL-aware) */}
+      <div 
+        style={{ 
+          position: 'fixed', 
+          top: '1rem', 
+          insetInlineEnd: '1rem',
+          zIndex: 1000,
+        }}
+      >
+        <LanguageSelector 
+          variant="dropdown" 
+          showFlags={true} 
+          showLabels={false}
+        />
+      </div>
+
       {/* Ambient elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-gold-500/5 rounded-full blur-3xl animate-float"></div>
@@ -83,12 +102,12 @@ export const LoginForm: React.FC = () => {
             </svg>
           </div>
           <h2 className="text-4xl font-bold text-ink-900 mb-3 tracking-tight">
-            Welcome back
+            {t('auth.login.welcome_back')}
           </h2>
           <p className="text-ink-600">
-            New here?{' '}
+            {t('auth.login.new_here')}{' '}
             <Link to="/register" className="font-semibold text-ink-900 hover:text-gold-600 transition-colors">
-              Create account
+              {t('auth.login.create_account')}
             </Link>
           </p>
         </div>
@@ -109,7 +128,7 @@ export const LoginForm: React.FC = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-ink-900 mb-2.5">
-                Email address
+                {t('auth.login.email_label')}
               </label>
               <input
                 id="email"
@@ -119,7 +138,7 @@ export const LoginForm: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={errors.email ? 'input-error' : 'input'}
-                placeholder="you@example.com"
+                placeholder={t('auth.login.email_placeholder')}
               />
               {errors.email && (
                 <p className="mt-2.5 text-sm text-red-600 flex items-center gap-1.5 font-medium">
@@ -133,7 +152,7 @@ export const LoginForm: React.FC = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-ink-900 mb-2.5">
-                Password
+                {t('auth.login.password_label')}
               </label>
               <div className="relative">
                 <input
@@ -143,14 +162,14 @@ export const LoginForm: React.FC = () => {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={errors.password ? 'input-error pr-12' : 'input pr-12'}
-                  placeholder="••••••••"
+                  className={errors.password ? 'input-error pe-12' : 'input pe-12'}
+                  placeholder={t('auth.login.password_placeholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700 transition-colors touch-target rounded-lg hover:bg-ink-50"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700 transition-colors touch-target rounded-lg hover:bg-ink-50"
+                  aria-label={showPassword ? t('auth.login.hide_password') : t('auth.login.show_password')}
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -182,10 +201,10 @@ export const LoginForm: React.FC = () => {
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="spinner w-5 h-5"></span>
-                  Signing in...
+                  {t('auth.login.signing_in')}
                 </span>
               ) : (
-                'Sign in'
+                t('auth.login.submit_button')
               )}
             </button>
           </form>
@@ -194,10 +213,10 @@ export const LoginForm: React.FC = () => {
         {/* Back to home */}
         <div className="text-center mt-8">
           <Link to="/" className="text-sm text-ink-600 hover:text-ink-900 transition-colors font-medium inline-flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to home
+            {t('auth.login.back_to_home')}
           </Link>
         </div>
       </div>

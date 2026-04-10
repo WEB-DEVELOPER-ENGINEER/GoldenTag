@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface Link {
   id: string;
@@ -37,6 +38,7 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
   onLinkUpdated,
 }) => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [icon, setIcon] = useState('');
@@ -73,17 +75,17 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
 
     // Validation
     if (!title.trim()) {
-      setError('Title is required');
+      setError(t('links.title_required'));
       return;
     }
 
     if (!url.trim()) {
-      setError('URL is required');
+      setError(t('links.url_required'));
       return;
     }
 
     if (!validateUrl(url)) {
-      setError('Please enter a valid URL (must start with http:// or https://)');
+      setError(t('links.url_invalid'));
       return;
     }
 
@@ -120,7 +122,7 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
       // Close modal
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('links.update_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -160,7 +162,7 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">
-              Edit Link
+              {t('common.edit')} {t('links.title')}
             </h3>
             <button
               onClick={handleClose}
@@ -188,7 +190,7 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
             <div className="mb-4 flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg">
               <span className="text-xl">{platformInfo.icon}</span>
               <span className="text-sm font-medium text-blue-700">
-                {platformInfo.name} Link
+                {t(`platforms.${platformInfo.id}`)} {t('links.title')}
               </span>
             </div>
           )}
@@ -198,7 +200,7 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
             {/* Title Field */}
             <div>
               <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 mb-1">
-                Title
+                {t('links.title_label')}
               </label>
               <input
                 type="text"
@@ -206,20 +208,20 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Link title"
+                placeholder={t('links.title_placeholder')}
                 required
                 maxLength={100}
                 disabled={isLoading}
               />
               <p className="text-xs text-gray-500 mt-1">
-                {title.length}/100 characters
+                {t('links.character_count', { count: title.length })}
               </p>
             </div>
 
             {/* URL Field */}
             <div>
               <label htmlFor="edit-url" className="block text-sm font-medium text-gray-700 mb-1">
-                URL
+                {t('links.url_label')}
               </label>
               <input
                 type="url"
@@ -227,7 +229,7 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://example.com"
+                placeholder={t('links.url_placeholder')}
                 required
                 disabled={isLoading}
               />
@@ -237,7 +239,7 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
             {link.type === 'CUSTOM' && (
               <div>
                 <label htmlFor="edit-icon" className="block text-sm font-medium text-gray-700 mb-1">
-                  Icon (optional)
+                  {t('links.icon_label')}
                 </label>
                 <input
                   type="text"
@@ -245,12 +247,12 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
                   value={icon}
                   onChange={(e) => setIcon(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="🔗 (emoji or icon)"
+                  placeholder={t('links.icon_placeholder')}
                   maxLength={2}
                   disabled={isLoading}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Use an emoji to represent your link
+                  {t('links.icon_hint')}
                 </p>
               </div>
             )}
@@ -259,10 +261,10 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div>
                 <label htmlFor="edit-visible" className="text-sm font-medium text-gray-700">
-                  Visible on profile
+                  {t('links.visible')}
                 </label>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Show this link to visitors
+                  {t('links.visible')}
                 </p>
               </div>
               <button
@@ -297,14 +299,14 @@ export const LinkEditModal: React.FC<LinkEditModalProps> = ({
                 disabled={isLoading}
                 className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                {isLoading ? 'Saving...' : 'Save Changes'}
+                {isLoading ? t('common.saving') : t('common.save')}
               </button>
             </div>
           </form>

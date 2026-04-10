@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface Link {
   id: string;
@@ -31,6 +32,7 @@ const PLATFORM_ICONS: Record<string, string> = {
 
 export const LinkList: React.FC<LinkListProps> = ({ onEditLink, onLinksChange }) => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [links, setLinks] = useState<Link[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export const LinkList: React.FC<LinkListProps> = ({ onEditLink, onLinksChange })
   };
 
   const handleDelete = async (linkId: string) => {
-    if (!confirm('Are you sure you want to delete this link?')) {
+    if (!confirm(t('links.delete_confirm'))) {
       return;
     }
 
@@ -175,7 +177,7 @@ export const LinkList: React.FC<LinkListProps> = ({ onEditLink, onLinksChange })
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="text-gray-500">Loading links...</div>
+        <div className="text-gray-500">{t('links.loading_links')}</div>
       </div>
     );
   }
@@ -188,7 +190,7 @@ export const LinkList: React.FC<LinkListProps> = ({ onEditLink, onLinksChange })
           onClick={fetchLinks}
           className="mt-2 text-sm text-red-700 underline hover:no-underline"
         >
-          Try again
+          {t('common.try_again')}
         </button>
       </div>
     );
@@ -197,7 +199,7 @@ export const LinkList: React.FC<LinkListProps> = ({ onEditLink, onLinksChange })
   if (links.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p>No links yet. Add your first link to get started!</p>
+        <p>{t('links.no_links')}</p>
       </div>
     );
   }
@@ -248,18 +250,18 @@ export const LinkList: React.FC<LinkListProps> = ({ onEditLink, onLinksChange })
               {link.url}
             </p>
             {link.type === 'PLATFORM' && link.platform && (
-              <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
-                {link.platform}
-              </span>
+                  <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
+                    {link.platform}
+                  </span>
             )}
           </div>
 
           {/* Visibility Toggle */}
           <div className="flex-shrink-0">
             {link.isVisible ? (
-              <span className="text-green-600 text-sm">Visible</span>
+              <span className="text-green-600 text-sm">{t('links.visible')}</span>
             ) : (
-              <span className="text-gray-400 text-sm">Hidden</span>
+              <span className="text-gray-400 text-sm">{t('links.hidden')}</span>
             )}
           </div>
 
@@ -269,13 +271,13 @@ export const LinkList: React.FC<LinkListProps> = ({ onEditLink, onLinksChange })
               onClick={() => onEditLink && onEditLink(link)}
               className="px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors"
             >
-              Edit
+              {t('common.edit')}
             </button>
             <button
               onClick={() => handleDelete(link.id)}
               className="px-3 py-1.5 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
             >
-              Delete
+              {t('common.delete')}
             </button>
           </div>
         </div>

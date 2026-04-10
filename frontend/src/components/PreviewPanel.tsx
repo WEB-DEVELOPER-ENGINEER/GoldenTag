@@ -1,5 +1,6 @@
 import React from 'react';
 import { getSocialIcon } from '../utils/socialIcons';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ThemeSettings {
   mode: 'light' | 'dark';
@@ -72,6 +73,8 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
   files,
   popup,
 }) => {
+  const { t } = useTranslation();
+  
   const getButtonRadius = () => {
     switch (theme.buttonStyle) {
       case 'square':
@@ -262,7 +265,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       {sortedContacts.length > 0 && (
         <div style={{ width: '100%', maxWidth: '600px', marginBottom: '16px' }}>
           <p style={{ fontSize: '12px', opacity: 0.6, marginBottom: '8px', fontWeight: '500' }}>
-            Contact Information
+            {t('public_profile.contact_information')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {sortedContacts.map((contact) => (
@@ -289,7 +292,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       {sortedFiles.length > 0 && (
         <div style={{ width: '100%', maxWidth: '600px', marginBottom: '16px' }}>
           <p style={{ fontSize: '12px', opacity: 0.6, marginBottom: '8px', fontWeight: '500' }}>
-            Downloads
+            {t('public_profile.downloads')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {sortedFiles.map((file) => (
@@ -313,7 +316,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
                 onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
-                <span style={{ marginRight: '8px' }}>📄</span>
+                <span className="me-2">📄</span>
                 {file.title}
               </a>
             ))}
@@ -325,7 +328,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       {!hasContent && (
         <div style={{ textAlign: 'center', opacity: 0.5, padding: '40px 0' }}>
           <p style={{ fontSize: '14px', margin: 0 }}>
-            Start editing your profile to see a preview
+            {t('dashboard.preview.placeholder')}
           </p>
         </div>
       )}

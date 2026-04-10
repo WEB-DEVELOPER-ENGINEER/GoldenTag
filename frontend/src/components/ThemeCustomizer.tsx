@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ThemeSettings {
   mode: 'light' | 'dark';
@@ -44,6 +45,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   onThemeUpdate 
 }) => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<ThemeSettings>({
     mode: currentTheme?.mode || 'light',
     primaryColor: currentTheme?.primaryColor || '#3B82F6',
@@ -99,7 +101,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
       const updatedTheme = await response.json();
       setTheme(prev => ({ ...prev, mode: updatedTheme.mode }));
-      setSuccessMessage('Theme mode updated!');
+      setSuccessMessage(t('theme.theme_updated'));
       
       if (onThemeUpdate) {
         onThemeUpdate({ ...theme, mode: updatedTheme.mode });
@@ -107,7 +109,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('theme.toggle_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +150,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       }
 
       const updatedTheme = await response.json();
-      setSuccessMessage('Theme saved successfully!');
+      setSuccessMessage(t('theme.theme_saved'));
       
       if (onThemeUpdate) {
         onThemeUpdate(updatedTheme);
@@ -156,7 +158,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('theme.save_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -164,14 +166,14 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">Theme Customization</h2>
+      <h2 className="text-xl font-semibold text-gray-900">{t('theme.title')}</h2>
 
       {/* Light/Dark Mode Toggle */}
       <div className="pb-4 border-b border-gray-200">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Theme Mode
+          {t('theme.mode')}
         </label>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <button
             onClick={handleModeToggle}
             disabled={isLoading}
@@ -181,7 +183,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            ☀️ Light
+            {t('theme.light')}
           </button>
           <button
             onClick={handleModeToggle}
@@ -192,7 +194,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            🌙 Dark
+            {t('theme.dark')}
           </button>
         </div>
       </div>
@@ -201,9 +203,9 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       <div className="space-y-4">
         <div>
           <label htmlFor="primaryColor" className="block text-sm font-medium text-gray-700 mb-2">
-            Primary Color
+            {t('theme.primary_color')}
           </label>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <input
               type="color"
               id="primaryColor"
@@ -223,9 +225,9 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
         <div>
           <label htmlFor="secondaryColor" className="block text-sm font-medium text-gray-700 mb-2">
-            Secondary Color
+            {t('theme.secondary_color')}
           </label>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <input
               type="color"
               id="secondaryColor"
@@ -245,9 +247,9 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
         <div>
           <label htmlFor="textColor" className="block text-sm font-medium text-gray-700 mb-2">
-            Text Color
+            {t('theme.text_color')}
           </label>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <input
               type="color"
               id="textColor"
@@ -269,7 +271,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       {/* Font Selection */}
       <div>
         <label htmlFor="fontFamily" className="block text-sm font-medium text-gray-700 mb-2">
-          Font Family
+          {t('theme.font_family')}
         </label>
         <select
           id="fontFamily"
@@ -288,7 +290,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       {/* Layout Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Layout
+          {t('theme.layout')}
         </label>
         <div className="grid grid-cols-3 gap-2">
           {LAYOUT_OPTIONS.map(option => (
@@ -301,7 +303,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                   : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {option.label}
+              {t(`theme.layout_${option.value}`)}
             </button>
           ))}
         </div>
@@ -310,7 +312,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       {/* Button Style Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Button Style
+          {t('theme.button_style')}
         </label>
         <div className="grid grid-cols-3 gap-2">
           {BUTTON_STYLE_OPTIONS.map(option => (
@@ -326,7 +328,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                   : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {option.label}
+              {t(`theme.button_${option.value}`)}
             </button>
           ))}
         </div>
@@ -352,7 +354,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
         disabled={isLoading}
         className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? 'Saving...' : 'Save Theme'}
+        {isLoading ? t('common.saving') : t('theme.save_theme')}
       </button>
     </div>
   );

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getSocialIcon } from '../utils/socialIcons';
+import { useTranslation } from '../hooks/useTranslation';
+import { LanguageSelector } from '../components/LanguageSelector';
 import './PublicProfile.css';
 
 interface ThemeSettings {
@@ -70,6 +72,7 @@ interface ProfileData {
 
 export const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
+  const { t } = useTranslation();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,9 +88,9 @@ export const PublicProfile: React.FC = () => {
 
         if (!response.ok) {
           if (response.status === 404) {
-            throw new Error('Profile not found');
+            throw new Error(t('public_profile.profile_not_found'));
           }
-          throw new Error('Failed to load profile');
+          throw new Error(t('errors.general'));
         }
 
         const data = await response.json();
@@ -121,7 +124,7 @@ export const PublicProfile: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 via-brand-50/30 to-accent-50/20">
         <div className="text-center animate-fade-in">
           <div className="spinner w-14 h-14 mx-auto mb-4"></div>
-          <p className="text-neutral-600 font-medium">Loading profile...</p>
+          <p className="text-neutral-600 font-medium">{t('public_profile.loading')}</p>
         </div>
       </div>
     );
@@ -136,8 +139,8 @@ export const PublicProfile: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-4xl font-bold text-neutral-900 mb-3">404</h1>
-          <p className="text-lg text-neutral-600 mb-8">{error || 'Profile not found'}</p>
+          <h1 className="text-4xl font-bold text-neutral-900 mb-3">{t('public_profile.not_found')}</h1>
+          <p className="text-lg text-neutral-600 mb-8">{error || t('public_profile.profile_not_found')}</p>
           <a
             href="/"
             className="btn-primary inline-flex items-center gap-2"
@@ -145,7 +148,7 @@ export const PublicProfile: React.FC = () => {
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            Go Home
+            {t('public_profile.go_home')}
           </a>
         </div>
       </div>
@@ -222,6 +225,15 @@ export const PublicProfile: React.FC = () => {
 
   return (
     <div className="profile-container" style={containerStyle}>
+      {/* Language Selector - Fixed position at top end (RTL-aware) */}
+      <div className="fixed top-4 end-4 z-50">
+        <LanguageSelector 
+          variant="dropdown" 
+          showFlags={true} 
+          showLabels={false}
+        />
+      </div>
+
       <div className="profile-content animate-fade-in" style={{ textAlign: theme.layout === 'centered' ? 'center' : theme.layout }}>
         {/* Premium Popup Message */}
         {profile.popup && profile.popup.isEnabled && showPopup && profile.popup.message && (
@@ -324,7 +336,7 @@ export const PublicProfile: React.FC = () => {
               className="section-header"
               style={{ color: theme.textColor }}
             >
-              Contact Information
+              {t('public_profile.contact_information')}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               {sortedContacts.map((contact) => (
@@ -336,8 +348,8 @@ export const PublicProfile: React.FC = () => {
                     color: theme.textColor,
                   }}
                 >
-                  <span style={{ fontWeight: '600', marginRight: '0.5rem' }}>
-                    {contact.label || (contact.type === 'email' ? 'Email' : 'Phone')}:
+                  <span className="font-semibold me-2">
+                    {contact.label || (contact.type === 'email' ? t('public_profile.email') : t('public_profile.phone'))}
                   </span>
                   {contact.type === 'email' ? (
                     <a
@@ -367,7 +379,7 @@ export const PublicProfile: React.FC = () => {
               className="section-header"
               style={{ color: theme.textColor }}
             >
-              Downloads
+              {t('public_profile.downloads')}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {sortedFiles.map((file) => (
@@ -385,7 +397,7 @@ export const PublicProfile: React.FC = () => {
                     borderRadius: getButtonRadius(),
                   }}
                 >
-                  <span style={{ marginRight: '0.625rem', fontSize: '1.25rem' }}>📄</span>
+                  <span className="me-2.5 text-xl">📄</span>
                   {file.title}
                 </a>
               ))}
@@ -410,8 +422,8 @@ export const PublicProfile: React.FC = () => {
             onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
           >
-            <span>Powered by</span>
-            <span style={{ fontWeight: '600' }}>Profile Hub</span>
+            <span>{t('public_profile.powered_by')}</span>
+            <span style={{ fontWeight: '600' }}>{t('public_profile.profile_hub')}</span>
           </a>
         </div>
       </div>

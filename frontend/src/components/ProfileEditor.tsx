@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ProfileData {
   displayName: string;
@@ -13,6 +14,7 @@ interface ProfileEditorProps {
 
 export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, initialData }) => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [displayName, setDisplayName] = useState(initialData?.displayName || '');
   const [bio, setBio] = useState(initialData?.bio || '');
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +57,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, i
       }
 
       const updatedProfile = await response.json();
-      setSuccessMessage('Profile updated successfully!');
+      setSuccessMessage(t('profile.profile_updated'));
       
       // Notify parent component of update
       if (onProfileUpdate) {
@@ -68,7 +70,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, i
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('profile.update_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -76,13 +78,13 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, i
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-ink-900 mb-6 tracking-tight">Profile Information</h2>
+      <h2 className="text-2xl font-bold text-ink-900 mb-6 tracking-tight">{t('profile.title')}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Display Name Field */}
         <div>
           <label htmlFor="displayName" className="block text-sm font-semibold text-ink-900 mb-2.5">
-            Display Name
+            {t('profile.display_name')}
           </label>
           <input
             type="text"
@@ -90,7 +92,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, i
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             className="input"
-            placeholder="Your name"
+            placeholder={t('profile.display_name_placeholder')}
             required
           />
         </div>
@@ -98,7 +100,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, i
         {/* Bio Field */}
         <div>
           <label htmlFor="bio" className="block text-sm font-semibold text-ink-900 mb-2.5">
-            Bio
+            {t('profile.bio')}
           </label>
           <textarea
             id="bio"
@@ -106,10 +108,10 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, i
             onChange={(e) => setBio(e.target.value)}
             rows={4}
             className="input resize-none"
-            placeholder="Tell visitors about yourself..."
+            placeholder={t('profile.bio_placeholder')}
           />
           <p className="text-xs text-ink-500 mt-2.5 font-medium">
-            {bio.length} characters
+            {bio.length} {t('common.characters')}
           </p>
         </div>
 
@@ -133,7 +135,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ onProfileUpdate, i
           disabled={isLoading || !displayName.trim()}
           className="btn-primary w-full"
         >
-          {isLoading ? 'Saving...' : 'Save Profile'}
+          {isLoading ? t('common.saving') : t('profile.save_profile')}
         </button>
       </form>
     </div>

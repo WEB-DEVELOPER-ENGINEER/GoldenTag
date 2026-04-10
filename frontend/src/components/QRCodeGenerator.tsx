@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 export const QRCodeGenerator: React.FC = () => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export const QRCodeGenerator: React.FC = () => {
       const data = await response.json();
       setQrCodeDataUrl(data.qrCode);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load QR code');
+      setError(err instanceof Error ? err.message : t('qrcode.fetch_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +81,7 @@ export const QRCodeGenerator: React.FC = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to download QR code');
+      setError(err instanceof Error ? err.message : t('qrcode.download_failed'));
     } finally {
       setIsDownloading(false);
     }
@@ -91,9 +93,9 @@ export const QRCodeGenerator: React.FC = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-ink-900 mb-3 tracking-tight">QR Code</h2>
+      <h2 className="text-2xl font-bold text-ink-900 mb-3 tracking-tight">{t('qrcode.title')}</h2>
       <p className="text-sm text-ink-600 mb-6 leading-relaxed">
-        Share your profile with a scannable QR code. Perfect for business cards, posters, or digital displays.
+        {t('qrcode.description')}
       </p>
 
       {/* Loading State */}
@@ -101,7 +103,7 @@ export const QRCodeGenerator: React.FC = () => {
         <div className="flex items-center justify-center p-12 bg-ink-50 rounded-2xl border border-ink-200">
           <div className="text-center">
             <div className="spinner w-12 h-12 mx-auto mb-4"></div>
-            <p className="text-sm text-ink-600 font-medium">Generating QR code...</p>
+            <p className="text-sm text-ink-600 font-medium">{t('qrcode.generating')}</p>
           </div>
         </div>
       )}
@@ -114,7 +116,7 @@ export const QRCodeGenerator: React.FC = () => {
             onClick={handleRefresh}
             className="btn-secondary text-sm"
           >
-            Try Again
+            {t('common.try_again')}
           </button>
         </div>
       )}
@@ -130,17 +132,17 @@ export const QRCodeGenerator: React.FC = () => {
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleDownload}
-              disabled={isDownloading}
-              className="btn-primary flex-1 flex items-center justify-center gap-2"
-            >
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="btn-primary flex-1 flex items-center justify-center gap-2"
+          >
               {isDownloading ? (
                 <>
                   <div className="spinner w-4 h-4"></div>
-                  <span>Downloading...</span>
+                  <span>{t('qrcode.downloading')}</span>
                 </>
               ) : (
                 <>
@@ -157,7 +159,7 @@ export const QRCodeGenerator: React.FC = () => {
                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                     />
                   </svg>
-                  <span>Download QR Code</span>
+                  <span>{t('qrcode.download')}</span>
                 </>
               )}
             </button>
@@ -166,7 +168,7 @@ export const QRCodeGenerator: React.FC = () => {
               onClick={handleRefresh}
               disabled={isLoading}
               className="btn-secondary flex items-center justify-center gap-2 sm:w-auto"
-              title="Refresh QR code"
+              title={t('qrcode.refresh')}
             >
               <svg
                 className="w-5 h-5"
@@ -181,7 +183,7 @@ export const QRCodeGenerator: React.FC = () => {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              <span className="sm:hidden">Refresh</span>
+              <span className="sm:hidden">{t('qrcode.refresh')}</span>
             </button>
           </div>
 
@@ -191,24 +193,24 @@ export const QRCodeGenerator: React.FC = () => {
               <svg className="w-5 h-5 text-gold-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              How to use
+              {t('qrcode.how_to_use')}
             </h3>
             <ul className="text-sm text-ink-700 space-y-2 leading-relaxed">
               <li className="flex items-start gap-2">
                 <span className="text-gold-600 mt-0.5">•</span>
-                <span>Download and add to business cards or marketing materials</span>
+                <span>{t('qrcode.usage_1')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-gold-600 mt-0.5">•</span>
-                <span>Display at events or on digital screens</span>
+                <span>{t('qrcode.usage_2')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-gold-600 mt-0.5">•</span>
-                <span>Anyone can scan with their phone camera to visit your profile</span>
+                <span>{t('qrcode.usage_3')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-gold-600 mt-0.5">•</span>
-                <span>Updates automatically when you change your profile URL</span>
+                <span>{t('qrcode.usage_4')}</span>
               </li>
             </ul>
           </div>

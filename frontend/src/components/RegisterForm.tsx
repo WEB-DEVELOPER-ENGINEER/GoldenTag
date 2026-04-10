@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
+import { LanguageSelector } from './LanguageSelector';
 
 interface FormErrors {
   email?: string;
@@ -18,46 +20,47 @@ export const RegisterForm: React.FC = () => {
   
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const validateEmail = (email: string): string | undefined => {
     if (!email) {
-      return 'Email is required';
+      return t('auth.register.email_required');
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return 'Please enter a valid email address';
+      return t('auth.register.email_invalid');
     }
     return undefined;
   };
 
   const validatePassword = (password: string): string | undefined => {
     if (!password) {
-      return 'Password is required';
+      return t('auth.register.password_required');
     }
     if (password.length < 8) {
-      return 'Password must be at least 8 characters long';
+      return t('auth.register.password_min_length');
     }
     if (!/[A-Z]/.test(password)) {
-      return 'Password must contain at least one uppercase letter';
+      return t('auth.register.password_uppercase');
     }
     if (!/[a-z]/.test(password)) {
-      return 'Password must contain at least one lowercase letter';
+      return t('auth.register.password_lowercase');
     }
     if (!/[0-9]/.test(password)) {
-      return 'Password must contain at least one number';
+      return t('auth.register.password_number');
     }
     return undefined;
   };
 
   const validateUsername = (username: string): string | undefined => {
     if (!username) {
-      return 'Username is required';
+      return t('auth.register.username_required');
     }
     if (username.length < 3) {
-      return 'Username must be at least 3 characters long';
+      return t('auth.register.username_min_length');
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-      return 'Username can only contain letters, numbers, hyphens, and underscores';
+      return t('auth.register.username_invalid');
     }
     return undefined;
   };
@@ -89,7 +92,7 @@ export const RegisterForm: React.FC = () => {
       navigate('/dashboard');
     } catch (error) {
       setErrors({
-        general: error instanceof Error ? error.message : 'Registration failed. Please try again.',
+        general: error instanceof Error ? error.message : t('auth.register.registration_failed'),
       });
     } finally {
       setIsSubmitting(false);
@@ -98,15 +101,31 @@ export const RegisterForm: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Language Selector - Fixed position at top end (RTL-aware) */}
+      <div 
+        style={{ 
+          position: 'fixed', 
+          top: '1rem', 
+          insetInlineEnd: '1rem',
+          zIndex: 1000,
+        }}
+      >
+        <LanguageSelector 
+          variant="dropdown" 
+          showFlags={true} 
+          showLabels={false}
+        />
+      </div>
+
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
+            {t('auth.register.create_account')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Already have an account?{' '}
+            {t('auth.register.have_account')}{' '}
             <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign in
+              {t('auth.register.sign_in')}
             </Link>
           </p>
         </div>
@@ -121,7 +140,7 @@ export const RegisterForm: React.FC = () => {
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                {t('auth.register.email_label')}
               </label>
               <input
                 id="email"
@@ -133,7 +152,7 @@ export const RegisterForm: React.FC = () => {
                 className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="you@example.com"
+                placeholder={t('auth.register.email_placeholder')}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -142,7 +161,7 @@ export const RegisterForm: React.FC = () => {
 
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
+                {t('auth.register.username_label')}
               </label>
               <input
                 id="username"
@@ -154,7 +173,7 @@ export const RegisterForm: React.FC = () => {
                 className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
                   errors.username ? 'border-red-300' : 'border-gray-300'
                 } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="johndoe"
+                placeholder={t('auth.register.username_placeholder')}
               />
               {errors.username && (
                 <p className="mt-1 text-sm text-red-600">{errors.username}</p>
@@ -163,7 +182,7 @@ export const RegisterForm: React.FC = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                {t('auth.register.password_label')}
               </label>
               <input
                 id="password"
@@ -175,13 +194,13 @@ export const RegisterForm: React.FC = () => {
                 className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
                   errors.password ? 'border-red-300' : 'border-gray-300'
                 } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="••••••••"
+                placeholder={t('auth.register.password_placeholder')}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Must be at least 8 characters with uppercase, lowercase, and numbers
+                {t('auth.register.password_hint')}
               </p>
             </div>
           </div>
@@ -196,7 +215,7 @@ export const RegisterForm: React.FC = () => {
                   : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
               }`}
             >
-              {isSubmitting ? 'Creating account...' : 'Create account'}
+              {isSubmitting ? t('auth.register.creating_account') : t('auth.register.submit_button')}
             </button>
           </div>
         </form>

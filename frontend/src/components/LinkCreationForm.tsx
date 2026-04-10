@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LinkCreationFormProps {
   onLinkCreated?: () => void;
@@ -20,6 +21,7 @@ const SUPPORTED_PLATFORMS = [
 
 export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreated }) => {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [linkType, setLinkType] = useState<LinkType>('PLATFORM');
   const [selectedPlatform, setSelectedPlatform] = useState<string>('');
   const [title, setTitle] = useState('');
@@ -53,22 +55,22 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
 
     // Validation
     if (!title.trim()) {
-      setError('Title is required');
+      setError(t('links.title_required'));
       return;
     }
 
     if (!url.trim()) {
-      setError('URL is required');
+      setError(t('links.url_required'));
       return;
     }
 
     if (!validateUrl(url)) {
-      setError('Please enter a valid URL (must start with http:// or https://)');
+      setError(t('links.url_invalid'));
       return;
     }
 
     if (linkType === 'PLATFORM' && !selectedPlatform) {
-      setError('Please select a platform');
+      setError(t('links.platform_required'));
       return;
     }
 
@@ -98,7 +100,7 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
         throw new Error(errorData.error?.message || 'Failed to create link');
       }
 
-      setSuccessMessage('Link created successfully!');
+      setSuccessMessage(t('links.link_created'));
       
       // Reset form
       setTitle('');
@@ -114,7 +116,7 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('links.create_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -123,20 +125,20 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
   const getPlaceholder = () => {
     if (linkType === 'PLATFORM' && selectedPlatform) {
       const platform = SUPPORTED_PLATFORMS.find(p => p.id === selectedPlatform);
-      return platform?.placeholder || 'Enter URL';
+      return platform?.placeholder || t('links.url_placeholder');
     }
-    return 'https://example.com';
+    return t('links.url_placeholder');
   };
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Add New Link</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('links.add_new')}</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Link Type Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Link Type
+            {t('links.link_type')}
           </label>
           <div className="flex gap-4">
             <button
@@ -152,8 +154,8 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
               }`}
             >
-              <div className="font-medium">Platform Link</div>
-              <div className="text-xs mt-1">Social media & popular platforms</div>
+              <div className="font-medium">{t('links.platform_link')}</div>
+              <div className="text-xs mt-1">{t('links.platform_link_desc')}</div>
             </button>
             <button
               type="button"
@@ -169,8 +171,8 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
               }`}
             >
-              <div className="font-medium">Custom Link</div>
-              <div className="text-xs mt-1">Any website or URL</div>
+              <div className="font-medium">{t('links.custom_link')}</div>
+              <div className="text-xs mt-1">{t('links.custom_link_desc')}</div>
             </button>
           </div>
         </div>
@@ -179,7 +181,7 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
         {linkType === 'PLATFORM' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Platform
+              {t('links.select_platform')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {SUPPORTED_PLATFORMS.map((platform) => (
@@ -204,7 +206,7 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
         {/* Title Field */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Title
+            {t('links.title_label')}
           </label>
           <input
             type="text"
@@ -212,19 +214,19 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={linkType === 'PLATFORM' ? 'Auto-filled from platform' : 'My Website'}
+            placeholder={linkType === 'PLATFORM' ? t('links.title_auto_filled') : t('links.title_placeholder')}
             required
             maxLength={100}
           />
           <p className="text-xs text-gray-500 mt-1">
-            {title.length}/100 characters
+            {t('links.character_count', { count: title.length })}
           </p>
         </div>
 
         {/* URL Field */}
         <div>
           <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-            URL
+            {t('links.url_label')}
           </label>
           <input
             type="url"
@@ -241,7 +243,7 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
         {linkType === 'CUSTOM' && (
           <div>
             <label htmlFor="customIcon" className="block text-sm font-medium text-gray-700 mb-1">
-              Icon (optional)
+              {t('links.icon_label')}
             </label>
             <input
               type="text"
@@ -249,11 +251,11 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
               value={customIcon}
               onChange={(e) => setCustomIcon(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="🔗 (emoji or icon)"
+              placeholder={t('links.icon_placeholder')}
               maxLength={2}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Use an emoji to represent your link
+              {t('links.icon_hint')}
             </p>
           </div>
         )}
@@ -278,7 +280,7 @@ export const LinkCreationForm: React.FC<LinkCreationFormProps> = ({ onLinkCreate
           disabled={isLoading}
           className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
-          {isLoading ? 'Creating...' : 'Create Link'}
+          {isLoading ? t('common.creating') : t('links.create_link')}
         </button>
       </form>
     </div>
