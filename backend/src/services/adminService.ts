@@ -430,3 +430,117 @@ export const updateUserPassword = async (userId: string, adminId: string, newPas
 
   return { success: true, message: 'Password updated successfully' };
 };
+
+export const updateUserProfile = async (userId: string, adminId: string, profileData: {
+  displayName?: string;
+  bio?: string;
+  avatarUrl?: string;
+  backgroundType?: 'COLOR' | 'IMAGE';
+  backgroundColor?: string;
+  backgroundImageUrl?: string;
+  isPublished?: boolean;
+}) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { profile: true },
+  });
+
+  if (!user || !user.profile) {
+    throw new AppError(404, 'PROFILE_NOT_FOUND', 'User profile not found');
+  }
+
+  const updatedProfile = await prisma.profile.update({
+    where: { id: user.profile.id },
+    data: profileData,
+  });
+
+  // Log admin action
+  adminActionLogs.push({
+    adminId,
+    action: 'UPDATE_PROFILE',
+    targetUserId: userId,
+    timestamp: new Date(),
+  });
+
+  return updatedProfile;
+};
+
+export const updateUserTheme = async (userId: string, adminId: string, themeData: {
+  mode?: 'LIGHT' | 'DARK';
+  primaryColor?: string;
+  secondaryColor?: string;
+  textColor?: string;
+  fontFamily?: string;
+  layout?: 'CENTERED' | 'LEFT' | 'RIGHT';
+  buttonStyle?: 'ROUNDED' | 'SQUARE' | 'PILL';
+}) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { profile: { include: { theme: true } } },
+  });
+
+  if (!user || !user.profile || !user.profile.theme) {
+    throw new AppError(404, 'THEME_NOT_FOUND', 'User theme not found');
+  }
+
+  const updatedTheme = await prisma.theme.update({
+    where: { id: user.profile.theme.id },
+    data: themeData,
+  });
+
+  // Log admin action
+  adminActionLogs.push({
+    adminId,
+    action: 'UPDATE_THEME',
+    targetUserId: userId,
+    timestamp: new Date(),
+  });
+
+  return updatedTheme;
+};
+
+export const updateUserPopup = async (userId: string, adminId: string, popupData: {
+  isEnabled?: boolean;
+  message?: string;
+  duration?: number;
+  backgroundColor?: string;
+  textColor?: string;
+}) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { profile: { include: { popup: true } } },
+  });
+
+  if (!user || !user.profile) {
+    throw new AppError(404, 'PROFILE_NOT_FOUND', 'User profile not found');
+  }
+
+  let updatedPopup;
+  if (user.profile.popup) {
+    updatedPopup = await prisma.popup.update({
+      where: { id: user.profile.popup.id },
+      data: popupData,
+    });
+  } else {
+    updatedPopup = await prisma.popup.create({
+      data: {
+        profileId: user.profile.id,
+        isEnabled: popupData.isEnabled ?? false,
+        message: popupData.message ?? '',
+        duration: popupData.duration,
+        backgroundColor: popupData.backgroundColor ?? '#3b82f6',
+        textColor: popupData.textColor ?? '#ffffff',
+      },
+    });
+  }
+
+  // Log admin action
+  adminActionLogs.push({
+    adminId,
+    action: 'UPDATE_POPUP',
+    targetUserId: userId,
+    timestamp: new Date(),
+  });
+
+  return updatedPopup;
+};

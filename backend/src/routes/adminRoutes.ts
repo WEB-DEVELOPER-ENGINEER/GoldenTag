@@ -11,6 +11,9 @@ import {
   deleteUser,
   createUser,
   updateUserPassword,
+  updateUserProfile,
+  updateUserTheme,
+  updateUserPopup,
 } from '../services/adminService';
 
 const router = Router();
@@ -207,6 +210,60 @@ router.put('/users/:id/password', async (req: Request, res: Response, next: Next
     const result = await updateUserPassword(id, adminId, password);
     
     res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT /api/admin/users/:id/profile - Update user profile
+router.put('/users/:id/profile', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.userId;
+    const profileData = req.body;
+
+    const profile = await updateUserProfile(id, adminId, profileData);
+    
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      profile,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT /api/admin/users/:id/theme - Update user theme
+router.put('/users/:id/theme', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.userId;
+    const themeData = req.body;
+
+    const theme = await updateUserTheme(id, adminId, themeData);
+    
+    res.status(200).json({
+      message: 'Theme updated successfully',
+      theme,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT /api/admin/users/:id/popup - Update user popup
+router.put('/users/:id/popup', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.userId;
+    const popupData = req.body;
+
+    const popup = await updateUserPopup(id, adminId, popupData);
+    
+    res.status(200).json({
+      message: 'Popup updated successfully',
+      popup,
+    });
   } catch (error) {
     next(error);
   }
