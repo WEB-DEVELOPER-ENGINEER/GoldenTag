@@ -15,6 +15,9 @@ import {
   updateUserTheme,
   updateUserPopup,
 } from '../services/adminService';
+import { updateProfilePicture, updateBackgroundImage } from '../services/profileService';
+import { uploadProfilePicture, uploadBackgroundImage } from '../config/multer';
+import { validateImageFile } from '../utils/fileStorage';
 
 const router = Router();
 
@@ -264,6 +267,72 @@ router.put('/users/:id/popup', async (req: Request, res: Response, next: NextFun
       message: 'Popup updated successfully',
       popup,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/admin/users/:id/avatar - Upload avatar for user
+router.post('/users/:id/avatar', uploadProfilePicture.single('avatar'), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        error: {
+          code: 'NO_FILE',
+          message: 'No file uploaded'
+        }
+      });
+    }
+
+    // Validate file type and size
+    const validation = validateImageFile(req.file.mimetype, req.file.size);
+    if (!validation.valid) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_FILE',
+          message: validation.error
+        }
+      });
+    }
+
+    const updatedProfile = await updateProfilePicture(id, req.file.filename);
+    
+    res.status(200).json(updatedProfile);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/admin/users/:id/background - Upload background for user
+router.post('/users/:id/background', uploadBackgroundImage.single('background'), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        error: {
+          code: 'NO_FILE',
+          message: 'No file uploaded'
+        }
+      });
+    }
+
+    // Validate file type and size
+    const validation = validateImageFile(req.file.mimetype, req.file.size);
+    if (!validation.valid) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_FILE',
+          message: validation.error
+        }
+      });
+    }
+
+    const updatedProfile = await updateBackgroundImage(id, req.file.filename);
+    
+    res.status(200).json(updatedProfile);
   } catch (error) {
     next(error);
   }
