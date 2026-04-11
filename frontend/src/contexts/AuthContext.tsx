@@ -65,12 +65,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const data = await response.json();
     
+    // Normalize role to lowercase for frontend consistency
+    const normalizedUser = {
+      ...data.user,
+      role: data.user.role.toLowerCase() as 'user' | 'admin'
+    };
+    
     // Store token and user data
     localStorage.setItem(TOKEN_KEY, data.token);
-    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
     
     setToken(data.token);
-    setUser(data.user);
+    setUser(normalizedUser);
   };
 
   const register = async (email: string, password: string, username: string): Promise<void> => {
@@ -89,12 +95,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const data = await response.json();
     
+    // Normalize role to lowercase for frontend consistency
+    const normalizedUser = {
+      ...data.user,
+      role: data.user.role.toLowerCase() as 'user' | 'admin'
+    };
+    
     // Store token and user data
     localStorage.setItem(TOKEN_KEY, data.token);
-    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
     
     setToken(data.token);
-    setUser(data.user);
+    setUser(normalizedUser);
   };
 
   const logout = (): void => {
