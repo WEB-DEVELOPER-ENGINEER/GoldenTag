@@ -39,6 +39,33 @@ interface UserDetail {
       backgroundColor: string;
       textColor: string;
     };
+    links?: Array<{
+      id: string;
+      type: 'PLATFORM' | 'CUSTOM';
+      platform: string | null;
+      title: string;
+      url: string;
+      icon: string | null;
+      order: number;
+      isVisible: boolean;
+    }>;
+    contacts?: Array<{
+      id: string;
+      type: 'EMAIL' | 'PHONE';
+      value: string;
+      label: string | null;
+      order: number;
+    }>;
+    files?: Array<{
+      id: string;
+      filename: string;
+      originalName: string;
+      title: string;
+      fileUrl: string;
+      fileSize: number;
+      mimeType: string;
+      order: number;
+    }>;
   };
 }
 
@@ -102,6 +129,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     backgroundColor: '#3b82f6',
     textColor: '#ffffff',
   });
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
 
   useEffect(() => {
     fetchUserDetail();
@@ -474,6 +503,80 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingAvatar(true);
+      setError(null);
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/profile/avatar`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to upload avatar');
+      }
+
+      const data = await response.json();
+      setProfileForm({ ...profileForm, avatarUrl: data.avatarUrl });
+      setHasChanges(true);
+      alert('Avatar uploaded! Click "Save Profile" to apply changes.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingBackground(true);
+      setError(null);
+
+      const formData = new FormData();
+      formData.append('background', file);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/profile/background`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to upload background');
+      }
+
+      const data = await response.json();
+      setProfileForm({ ...profileForm, backgroundImageUrl: data.backgroundUrl });
+      setHasChanges(true);
+      alert('Background uploaded! Click "Save Profile" to apply changes.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload background');
+    } finally {
+      setUploadingBackground(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -826,8 +929,50 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     
     return (
       <div className="space-y-6">
+        {/* Avatar Section */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Settings</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Avatar</h3>
+          <div className="flex items-center gap-6">
+            {profileForm.avatarUrl && (
+              <img 
+                src={profileForm.avatarUrl} 
+                alt="Avatar" 
+                className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
+              />
+            )}
+            <div className="flex-1">
+              <label className="block">
+                <span className="sr-only">Choose avatar</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  disabled={uploadingAvatar}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                />
+              </label>
+              <p className="text-xs text-gray-500 mt-2">Upload a new avatar image (JPG, PNG, max 5MB)</p>
+              {uploadingAvatar && <p className="text-sm text-blue-600 mt-2">Uploading...</p>}
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Or paste Avatar URL</label>
+            <input
+              type="url"
+              value={profileForm.avatarUrl}
+              onChange={(e) => {
+                setProfileForm({ ...profileForm, avatarUrl: e.target.value });
+                setHasChanges(true);
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://example.com/avatar.jpg"
+            />
+          </div>
+        </div>
+
+        {/* Profile Information */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
@@ -852,22 +997,32 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 }}
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Tell us about yourself..."
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Avatar URL</label>
+            <div className="flex items-center p-4 bg-gray-50 rounded-lg">
               <input
-                type="url"
-                value={profileForm.avatarUrl}
+                type="checkbox"
+                id="isPublished"
+                checked={profileForm.isPublished}
                 onChange={(e) => {
-                  setProfileForm({ ...profileForm, avatarUrl: e.target.value });
+                  setProfileForm({ ...profileForm, isPublished: e.target.checked });
                   setHasChanges(true);
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
+              <label htmlFor="isPublished" className="ml-3 text-sm font-medium text-gray-700">
+                Profile is published and visible to public
+              </label>
             </div>
+          </div>
+        </div>
 
+        {/* Background Section */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Background</h3>
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Background Type</label>
               <select
@@ -886,19 +1041,52 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
             {profileForm.backgroundType === 'COLOR' ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
-                <input
-                  type="color"
-                  value={profileForm.backgroundColor}
-                  onChange={(e) => {
-                    setProfileForm({ ...profileForm, backgroundColor: e.target.value });
-                    setHasChanges(true);
-                  }}
-                  className="w-full h-12 border border-gray-300 rounded-lg"
-                />
+                <div className="flex gap-4 items-center">
+                  <input
+                    type="color"
+                    value={profileForm.backgroundColor}
+                    onChange={(e) => {
+                      setProfileForm({ ...profileForm, backgroundColor: e.target.value });
+                      setHasChanges(true);
+                    }}
+                    className="w-20 h-12 border border-gray-300 rounded-lg cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={profileForm.backgroundColor}
+                    onChange={(e) => {
+                      setProfileForm({ ...profileForm, backgroundColor: e.target.value });
+                      setHasChanges(true);
+                    }}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                    placeholder="#ffffff"
+                  />
+                </div>
               </div>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Background Image URL</label>
+                {profileForm.backgroundImageUrl && (
+                  <div className="mb-4">
+                    <img 
+                      src={profileForm.backgroundImageUrl} 
+                      alt="Background" 
+                      className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                    />
+                  </div>
+                )}
+                <label className="block mb-2">
+                  <span className="sr-only">Choose background image</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBackgroundUpload}
+                    disabled={uploadingBackground}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mb-4">Upload a background image (JPG, PNG, max 5MB)</p>
+                {uploadingBackground && <p className="text-sm text-blue-600 mb-2">Uploading...</p>}
+                <label className="block text-sm font-medium text-gray-700 mb-2">Or paste Background URL</label>
                 <input
                   type="url"
                   value={profileForm.backgroundImageUrl}
@@ -907,24 +1095,26 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     setHasChanges(true);
                   }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/background.jpg"
                 />
               </div>
             )}
+          </div>
+        </div>
 
-            <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-              <input
-                type="checkbox"
-                id="isPublished"
-                checked={profileForm.isPublished}
-                onChange={(e) => {
-                  setProfileForm({ ...profileForm, isPublished: e.target.checked });
-                  setHasChanges(true);
-                }}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="isPublished" className="ml-3 text-sm font-medium text-gray-700">
-                Profile is published and visible
-              </label>
+        {/* Stats */}
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Stats</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Profile Views</p>
+              <p className="text-2xl font-bold text-gray-900">{user.profile.viewCount}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Created</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {new Date(user.profile.createdAt).toLocaleDateString()}
+              </p>
             </div>
           </div>
         </div>
@@ -933,15 +1123,44 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   }
 
   function renderThemeTab() {
-    if (!user?.profile?.theme) return null;
+    if (!user?.profile?.theme) return <div className="text-center py-12"><p className="text-gray-500">No theme data available</p></div>;
     
     return (
       <div className="space-y-6">
+        {/* Theme Preview */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Theme Settings</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Theme Preview</h3>
+          <div 
+            className="p-6 rounded-lg border-2"
+            style={{
+              backgroundColor: themeForm.mode === 'DARK' ? '#1f2937' : '#ffffff',
+              color: themeForm.textColor,
+              fontFamily: themeForm.fontFamily,
+            }}
+          >
+            <h4 className="text-xl font-bold mb-2" style={{ color: themeForm.primaryColor }}>
+              Sample Heading
+            </h4>
+            <p className="mb-4">This is how the profile will look with current theme settings.</p>
+            <button 
+              className="px-4 py-2 rounded font-medium"
+              style={{
+                backgroundColor: themeForm.primaryColor,
+                color: '#ffffff',
+                borderRadius: themeForm.buttonStyle === 'PILL' ? '9999px' : themeForm.buttonStyle === 'SQUARE' ? '0' : '0.5rem',
+              }}
+            >
+              Sample Button
+            </button>
+          </div>
+        </div>
+
+        {/* Layout & Style */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Layout & Style</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mode</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Theme Mode</label>
               <select
                 value={themeForm.mode}
                 onChange={(e) => {
@@ -950,13 +1169,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="LIGHT">Light</option>
-                <option value="DARK">Dark</option>
+                <option value="LIGHT">☀️ Light Mode</option>
+                <option value="DARK">🌙 Dark Mode</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Content Layout</label>
               <select
                 value={themeForm.layout}
                 onChange={(e) => {
@@ -965,9 +1184,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="CENTERED">Centered</option>
-                <option value="LEFT">Left</option>
-                <option value="RIGHT">Right</option>
+                <option value="CENTERED">⬛ Centered</option>
+                <option value="LEFT">⬅️ Left Aligned</option>
+                <option value="RIGHT">➡️ Right Aligned</option>
               </select>
             </div>
 
@@ -981,62 +1200,110 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="ROUNDED">Rounded</option>
-                <option value="SQUARE">Square</option>
-                <option value="PILL">Pill</option>
+                <option value="ROUNDED">🔘 Rounded</option>
+                <option value="SQUARE">⬜ Square</option>
+                <option value="PILL">💊 Pill</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Font Family</label>
-              <input
-                type="text"
+              <select
                 value={themeForm.fontFamily}
                 onChange={(e) => {
                   setThemeForm({ ...themeForm, fontFamily: e.target.value });
                   setHasChanges(true);
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              >
+                <option value="Inter">Inter</option>
+                <option value="Poppins">Poppins</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Open Sans">Open Sans</option>
+                <option value="Lato">Lato</option>
+                <option value="Montserrat">Montserrat</option>
+              </select>
             </div>
+          </div>
+        </div>
 
+        {/* Colors */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Color Scheme</h3>
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Primary Color</label>
-              <input
-                type="color"
-                value={themeForm.primaryColor}
-                onChange={(e) => {
-                  setThemeForm({ ...themeForm, primaryColor: e.target.value });
-                  setHasChanges(true);
-                }}
-                className="w-full h-12 border border-gray-300 rounded-lg"
-              />
+              <div className="flex gap-4 items-center">
+                <input
+                  type="color"
+                  value={themeForm.primaryColor}
+                  onChange={(e) => {
+                    setThemeForm({ ...themeForm, primaryColor: e.target.value });
+                    setHasChanges(true);
+                  }}
+                  className="w-20 h-12 border border-gray-300 rounded-lg cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={themeForm.primaryColor}
+                  onChange={(e) => {
+                    setThemeForm({ ...themeForm, primaryColor: e.target.value });
+                    setHasChanges(true);
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="#3b82f6"
+                />
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Secondary Color</label>
-              <input
-                type="color"
-                value={themeForm.secondaryColor}
-                onChange={(e) => {
-                  setThemeForm({ ...themeForm, secondaryColor: e.target.value });
-                  setHasChanges(true);
-                }}
-                className="w-full h-12 border border-gray-300 rounded-lg"
-              />
+              <div className="flex gap-4 items-center">
+                <input
+                  type="color"
+                  value={themeForm.secondaryColor}
+                  onChange={(e) => {
+                    setThemeForm({ ...themeForm, secondaryColor: e.target.value });
+                    setHasChanges(true);
+                  }}
+                  className="w-20 h-12 border border-gray-300 rounded-lg cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={themeForm.secondaryColor}
+                  onChange={(e) => {
+                    setThemeForm({ ...themeForm, secondaryColor: e.target.value });
+                    setHasChanges(true);
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="#8b5cf6"
+                />
+              </div>
             </div>
 
-            <div className="col-span-2">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
-              <input
-                type="color"
-                value={themeForm.textColor}
-                onChange={(e) => {
-                  setThemeForm({ ...themeForm, textColor: e.target.value });
-                  setHasChanges(true);
-                }}
-                className="w-full h-12 border border-gray-300 rounded-lg"
-              />
+              <div className="flex gap-4 items-center">
+                <input
+                  type="color"
+                  value={themeForm.textColor}
+                  onChange={(e) => {
+                    setThemeForm({ ...themeForm, textColor: e.target.value });
+                    setHasChanges(true);
+                  }}
+                  className="w-20 h-12 border border-gray-300 rounded-lg cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={themeForm.textColor}
+                  onChange={(e) => {
+                    setThemeForm({ ...themeForm, textColor: e.target.value });
+                    setHasChanges(true);
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="#1f2937"
+                />
+              </div>
             </div>
           </div>
         </div>
