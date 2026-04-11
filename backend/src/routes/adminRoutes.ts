@@ -17,7 +17,14 @@ import {
 } from '../services/adminService';
 import { updateProfilePicture, updateBackgroundImage } from '../services/profileService';
 import { uploadProfilePicture, uploadBackgroundImage } from '../config/multer';
+import { uploadTempImage } from '../config/tempUpload';
 import { validateImageFile } from '../utils/fileStorage';
+import {
+  registerTempFile,
+  getTempFileUrl,
+  deleteTempFiles,
+  commitTempFile,
+} from '../services/tempFileService';
 
 const router = Router();
 
@@ -166,7 +173,7 @@ router.delete('/users/:id', async (req: Request, res: Response, next: NextFuncti
 router.post('/users', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const adminId = req.user!.userId;
-    const { email, username, password, role, isActive } = req.body;
+    const { email, username, password, role, isActive, profile, theme, popup, tempIds } = req.body;
 
     if (!email || !username || !password) {
       return res.status(400).json({
@@ -177,13 +184,47 @@ router.post('/users', async (req: Request, res: Response, next: NextFunction) =>
       });
     }
 
+    // Commit temporary files if provided
+    let avatarUrl = profile?.avatarUrl;
+    let backgroundImageUrl = profile?.backgroundImageUrl;
+
+    if (profile?.avatarTempId) {
+      try {
+        avatarUrl = await commitTempFile(profile.avatarTempId, 'avatars');
+      } catch (error) {
+        console.error('Failed to commit avatar temp file:', error);
+      }
+    }
+
+    if (profile?.backgroundTempId) {
+      try {
+        backgroundImageUrl = await commitTempFile(profile.backgroundTempId, 'backgrounds');
+      } catch (error) {
+        console.error('Failed to commit background temp file:', error);
+      }
+    }
+
     const user = await createUser(adminId, {
       email,
       username,
       password,
       role,
       isActive,
+      profile: profile ? {
+        ...profile,
+        avatarUrl,
+        backgroundImageUrl,
+      } : undefined,
+      theme,
+      popup,
     });
+
+    // Cleanup any remaining temp files
+    if (tempIds && Array.isArray(tempIds) && tempIds.length > 0) {
+      await deleteTempFiles(tempIds).catch(err => 
+        console.error('Failed to cleanup temp files:', err)
+      );
+    }
     
     res.status(201).json({
       message: 'User created successfully',
@@ -333,6 +374,105 @@ router.post('/users/:id/background', uploadBackgroundImage.single('background'),
     const updatedProfile = await updateBackgroundImage(id, req.file.filename);
     
     res.status(200).json(updatedProfile);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/admin/temp/avatar - Upload temporary avatar
+router.post('/temp/avatar', uploadTempImage.single('avatar'), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: {
+          code: 'NO_FILE',
+          message: 'No file uploaded'
+        }
+      });
+    }
+
+    // Validate file type and size
+    const validation = validateImageFile(req.file.mimetype, req.file.size);
+    if (!validation.valid) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_FILE',
+          message: validation.error
+        }
+      });
+    }
+
+    // Register temp file and get tracking ID
+    const tempId = registerTempFile(req.file.filename, 'avatar');
+    const tempUrl = getTempFileUrl(req.file.filename);
+
+    res.status(200).json({
+      tempId,
+      tempUrl,
+      filename: req.file.filename,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/admin/temp/background - Upload temporary background
+router.post('/temp/background', uploadTempImage.single('background'), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: {
+          code: 'NO_FILE',
+          message: 'No file uploaded'
+        }
+      });
+    }
+
+    // Validate file type and size
+    const validation = validateImageFile(req.file.mimetype, req.file.size);
+    if (!validation.valid) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_FILE',
+          message: validation.error
+        }
+      });
+    }
+
+    // Register temp file and get tracking ID
+    const tempId = registerTempFile(req.file.filename, 'background');
+    const tempUrl = getTempFileUrl(req.file.filename);
+
+    res.status(200).json({
+      tempId,
+      tempUrl,
+      filename: req.file.filename,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/admin/temp/cleanup - Cleanup temporary files
+router.delete('/temp/cleanup', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { tempIds } = req.body;
+
+    if (!tempIds || !Array.isArray(tempIds)) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'tempIds array is required'
+        }
+      });
+    }
+
+    await deleteTempFiles(tempIds);
+
+    res.status(200).json({
+      success: true,
+      message: 'Temporary files cleaned up'
+    });
   } catch (error) {
     next(error);
   }

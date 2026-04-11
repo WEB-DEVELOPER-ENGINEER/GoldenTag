@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProfileForm, ThemeForm, PopupForm } from '../UserDetailModal/types';
 import { ProfileTab } from '../UserDetailModal/ProfileTab';
 import { ThemeTab } from '../UserDetailModal/ThemeTab';
@@ -65,16 +65,46 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingBackground, setUploadingBackground] = useState(false);
-  const [createdUserId, setCreatedUserId] = useState<string | null>(null);
+  
+  // Track temporary file IDs for cleanup
+  const [tempFileIds, setTempFileIds] = useState<string[]>([]);
+  const [avatarTempId, setAvatarTempId] = useState<string | null>(null);
+  const [backgroundTempId, setBackgroundTempId] = useState<string | null>(null);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
   // Auto-fill displayName when username changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (accountForm.username && !profileForm.displayName) {
       setProfileForm(prev => ({ ...prev, displayName: accountForm.username }));
     }
   }, [accountForm.username]);
+
+  // Cleanup temp files on unmount or cancel
+  useEffect(() => {
+    return () => {
+      if (tempFileIds.length > 0) {
+        cleanupTempFiles(tempFileIds);
+      }
+    };
+  }, [tempFileIds]);
+
+  const cleanupTempFiles = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    
+    try {
+      await fetch(`${apiUrl}/api/admin/temp/cleanup`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tempIds: ids }),
+      });
+    } catch (error) {
+      console.error('Failed to cleanup temp files:', error);
+    }
+  };
 
   const handleCreateUser = async () => {
     if (!accountForm.email || !accountForm.username || !accountForm.password) {
@@ -91,42 +121,30 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
       setIsLoading(true);
       setError(null);
 
-      // Step 1: Create user account
-      const response = await fetch(`${apiUrl}/api/admin/users`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...accountForm,
-          role: accountForm.role.toUpperCase(),
-        }),
-      });
+      // Prepare comprehensive user data
+      const userData: any = {
+        ...accountForm,
+        role: accountForm.role.toUpperCase(),
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to create user');
-      }
-
-      const userData = await response.json();
-      const userId = userData.user.id;
-      setCreatedUserId(userId);
-
-      // Step 2: Update profile if any fields are filled
+      // Add profile data if any fields are filled
       if (profileForm.displayName || profileForm.bio || profileForm.avatarUrl || 
-          profileForm.backgroundColor !== '#ffffff' || profileForm.backgroundImageUrl) {
-        await fetch(`${apiUrl}/api/admin/users/${userId}/profile`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(profileForm),
-        });
+          profileForm.backgroundColor !== '#ffffff' || profileForm.backgroundImageUrl ||
+          avatarTempId || backgroundTempId) {
+        userData.profile = {
+          displayName: profileForm.displayName,
+          bio: profileForm.bio,
+          avatarUrl: profileForm.avatarUrl,
+          avatarTempId,
+          backgroundType: profileForm.backgroundType,
+          backgroundColor: profileForm.backgroundColor,
+          backgroundImageUrl: profileForm.backgroundImageUrl,
+          backgroundTempId,
+          isPublished: profileForm.isPublished,
+        };
       }
 
-      // Step 3: Update theme if any non-default values
+      // Add theme if customized
       const hasCustomTheme = 
         themeForm.mode !== 'LIGHT' ||
         themeForm.primaryColor !== '#3b82f6' ||
@@ -137,28 +155,35 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
         themeForm.buttonStyle !== 'ROUNDED';
 
       if (hasCustomTheme) {
-        await fetch(`${apiUrl}/api/admin/users/${userId}/theme`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(themeForm),
-        });
+        userData.theme = themeForm;
       }
 
-      // Step 4: Create popup if enabled or message is set
+      // Add popup if enabled or has message
       if (popupForm.isEnabled || popupForm.message) {
-        await fetch(`${apiUrl}/api/admin/users/${userId}/popup`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(popupForm),
-        });
+        userData.popup = popupForm;
       }
 
+      // Include temp file IDs for cleanup
+      userData.tempIds = tempFileIds;
+
+      // Create user with all data in one request
+      const response = await fetch(`${apiUrl}/api/admin/users`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to create user');
+      }
+
+      // Clear temp file tracking since they've been committed
+      setTempFileIds([]);
+      
       onUserCreated();
       onClose();
     } catch (err) {
@@ -172,11 +197,6 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!createdUserId) {
-      setError('Please create the user account first before uploading images');
-      return;
-    }
-
     try {
       setUploadingAvatar(true);
       setError(null);
@@ -184,7 +204,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch(`${apiUrl}/api/admin/users/${createdUserId}/avatar`, {
+      const response = await fetch(`${apiUrl}/api/admin/temp/avatar`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
@@ -195,7 +215,13 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
       }
 
       const data = await response.json();
-      setProfileForm({ ...profileForm, avatarUrl: data.avatarUrl });
+      
+      // Update form with temp URL for preview
+      setProfileForm({ ...profileForm, avatarUrl: data.tempUrl });
+      
+      // Track temp file ID
+      setAvatarTempId(data.tempId);
+      setTempFileIds(prev => [...prev, data.tempId]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload avatar');
     } finally {
@@ -207,11 +233,6 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!createdUserId) {
-      setError('Please create the user account first before uploading images');
-      return;
-    }
-
     try {
       setUploadingBackground(true);
       setError(null);
@@ -219,7 +240,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
       const formData = new FormData();
       formData.append('background', file);
 
-      const response = await fetch(`${apiUrl}/api/admin/users/${createdUserId}/background`, {
+      const response = await fetch(`${apiUrl}/api/admin/temp/background`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
@@ -230,12 +251,26 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
       }
 
       const data = await response.json();
-      setProfileForm({ ...profileForm, backgroundImageUrl: data.backgroundImageUrl });
+      
+      // Update form with temp URL for preview
+      setProfileForm({ ...profileForm, backgroundImageUrl: data.tempUrl });
+      
+      // Track temp file ID
+      setBackgroundTempId(data.tempId);
+      setTempFileIds(prev => [...prev, data.tempId]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload background');
     } finally {
       setUploadingBackground(false);
     }
+  };
+
+  const handleClose = () => {
+    // Cleanup temp files before closing
+    if (tempFileIds.length > 0) {
+      cleanupTempFiles(tempFileIds);
+    }
+    onClose();
   };
 
   const renderTabContent = () => {
@@ -321,7 +356,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 <div className="flex-1">
                   <p className="text-sm font-medium text-blue-900">Complete Setup</p>
                   <p className="text-xs text-blue-700 mt-1">
-                    Fill in the account details, then use the other tabs to customize the profile, theme, and popup settings before creating the user.
+                    Fill in the account details, then use the other tabs to customize the profile, theme, and popup settings. You can upload images directly!
                   </p>
                 </div>
               </div>
@@ -332,24 +367,22 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
       case 'profile':
         return (
           <div className="space-y-4">
-            {!createdUserId && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-amber-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-amber-900">Image Upload Note</p>
-                    <p className="text-xs text-amber-700 mt-1">
-                      You can paste image URLs now, or create the user first and then upload image files directly.
-                    </p>
-                  </div>
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-900">Image Upload Enabled</p>
+                  <p className="text-xs text-green-700 mt-1">
+                    You can now upload images directly! Files are stored temporarily and will be committed when you create the user, or cleaned up if you cancel.
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
             <ProfileTab
               user={{
-                id: createdUserId || '',
+                id: '',
                 email: accountForm.email,
                 username: accountForm.username,
                 role: accountForm.role,
@@ -386,7 +419,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
         return (
           <ThemeTab
             user={{
-              id: createdUserId || '',
+              id: '',
               email: accountForm.email,
               username: accountForm.username,
               role: accountForm.role,
@@ -428,7 +461,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
         return (
           <PopupTab
             user={{
-              id: createdUserId || '',
+              id: '',
               email: accountForm.email,
               username: accountForm.username,
               role: accountForm.role,
@@ -480,7 +513,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -536,7 +569,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
           </div>
           <div className="flex gap-3">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
             >
               Cancel

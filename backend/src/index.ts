@@ -12,6 +12,7 @@ import popupRoutes from './routes/popupRoutes';
 import qrcodeRoutes from './routes/qrcodeRoutes';
 import adminRoutes from './routes/adminRoutes';
 import { ensureUploadDir, getUploadDir } from './utils/fileStorage';
+import { startTempFileCleanup } from './services/tempFileService';
 
 // Load environment variables
 dotenv.config();
@@ -26,9 +27,13 @@ const initializeStorage = async () => {
   await ensureUploadDir(path.join(uploadDir, 'avatars'));
   await ensureUploadDir(path.join(uploadDir, 'backgrounds'));
   await ensureUploadDir(path.join(uploadDir, 'pdfs'));
+  await ensureUploadDir(path.join(uploadDir, 'temp'));
 };
 
 initializeStorage().catch(console.error);
+
+// Start temporary file cleanup service
+startTempFileCleanup();
 
 // Middleware
 app.use(cors({

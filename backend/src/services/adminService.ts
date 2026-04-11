@@ -406,8 +406,35 @@ export const createUser = async (adminId: string, userData: {
   password: string;
   role?: 'USER' | 'ADMIN';
   isActive?: boolean;
+  profile?: {
+    displayName?: string;
+    bio?: string;
+    avatarUrl?: string;
+    avatarTempId?: string;
+    backgroundType?: 'COLOR' | 'IMAGE';
+    backgroundColor?: string;
+    backgroundImageUrl?: string;
+    backgroundTempId?: string;
+    isPublished?: boolean;
+  };
+  theme?: {
+    mode?: 'LIGHT' | 'DARK';
+    primaryColor?: string;
+    secondaryColor?: string;
+    textColor?: string;
+    fontFamily?: string;
+    layout?: 'CENTERED' | 'LEFT' | 'RIGHT';
+    buttonStyle?: 'ROUNDED' | 'SQUARE' | 'PILL';
+  };
+  popup?: {
+    isEnabled?: boolean;
+    message?: string;
+    duration?: number;
+    backgroundColor?: string;
+    textColor?: string;
+  };
 }) => {
-  const { email, username, password, role = 'USER', isActive = true } = userData;
+  const { email, username, password, role = 'USER', isActive = true, profile, theme, popup } = userData;
 
   // Check if email already exists
   const existingEmail = await prisma.user.findUnique({
@@ -429,7 +456,21 @@ export const createUser = async (adminId: string, userData: {
   const bcrypt = require('bcrypt');
   const passwordHash = await bcrypt.hash(password, 10);
 
-  // Create user with profile
+  // Prepare profile data
+  const profileData: any = {
+    displayName: profile?.displayName || username,
+    bio: profile?.bio,
+    avatarUrl: profile?.avatarUrl,
+    backgroundType: profile?.backgroundType || 'COLOR',
+    backgroundColor: profile?.backgroundColor,
+    backgroundImageUrl: profile?.backgroundImageUrl,
+    isPublished: profile?.isPublished || false,
+  };
+
+  // Prepare theme data
+  const themeData: any = theme || {};
+
+  // Create user with profile and theme
   const user = await prisma.user.create({
     data: {
       email,
@@ -439,10 +480,21 @@ export const createUser = async (adminId: string, userData: {
       isActive,
       profile: {
         create: {
-          displayName: username,
+          ...profileData,
           theme: {
-            create: {},
+            create: themeData,
           },
+          ...(popup && {
+            popup: {
+              create: {
+                isEnabled: popup.isEnabled || false,
+                message: popup.message || '',
+                duration: popup.duration,
+                backgroundColor: popup.backgroundColor || '#3b82f6',
+                textColor: popup.textColor || '#ffffff',
+              },
+            },
+          }),
         },
       },
     },
