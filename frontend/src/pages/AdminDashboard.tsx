@@ -134,40 +134,29 @@ export const AdminDashboard: React.FC = () => {
       {/* Navigation Bar */}
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  My Dashboard
-                </button>
-              </div>
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4 sm:space-x-8">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900">Admin Panel</h1>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="text-sm text-gray-600 hover:text-gray-900 hidden sm:block"
+              >
+                My Dashboard
+              </button>
             </div>
-            <div className="flex items-center space-x-4">
-              {/* Language Selector - Desktop */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <LanguageSelector 
                 variant="dropdown" 
                 showFlags={true} 
                 showLabels={false}
-                className="hidden sm:block"
               />
-              {/* Language Selector - Mobile (Compact) */}
-              <LanguageSelector 
-                variant="dropdown" 
-                showFlags={true} 
-                showLabels={false}
-                compact={true}
-                className="sm:hidden"
-              />
-              <span className="text-sm text-gray-600 hidden sm:inline">
-                {user?.username} (Admin)
-              </span>
+              <div className="hidden md:flex items-center px-3 py-1 bg-blue-50 rounded-md">
+                <span className="text-sm font-medium text-blue-900">{user?.username}</span>
+                <span className="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded">Admin</span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                className="px-3 sm:px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
               >
                 Logout
               </button>
@@ -177,22 +166,22 @@ export const AdminDashboard: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
-            <p className="text-gray-600 mt-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">User Management</h2>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
               View and manage all registered users
             </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm hover:shadow-md whitespace-nowrap"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Create New User
+            <span>Create New User</span>
           </button>
         </div>
 
