@@ -7,6 +7,10 @@ import {
   deactivateUser,
   reactivateUser,
   getAdminActionLogs,
+  updateUser,
+  deleteUser,
+  createUser,
+  updateUserPassword,
 } from '../services/adminService';
 
 const router = Router();
@@ -109,6 +113,100 @@ router.get('/logs', async (req: Request, res: Response, next: NextFunction) => {
     const logs = getAdminActionLogs(userId);
     
     res.status(200).json({ logs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT /api/admin/users/:id - Update user information
+router.put('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.userId;
+    const { email, username, role, isActive } = req.body;
+
+    const updateData: any = {};
+    if (email !== undefined) updateData.email = email;
+    if (username !== undefined) updateData.username = username;
+    if (role !== undefined) updateData.role = role;
+    if (isActive !== undefined) updateData.isActive = isActive;
+
+    const user = await updateUser(id, adminId, updateData);
+    
+    res.status(200).json({
+      message: 'User updated successfully',
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/admin/users/:id - Delete user permanently
+router.delete('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.userId;
+
+    const result = await deleteUser(id, adminId);
+    
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/admin/users - Create new user
+router.post('/users', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const adminId = req.user!.userId;
+    const { email, username, password, role, isActive } = req.body;
+
+    if (!email || !username || !password) {
+      return res.status(400).json({
+        error: {
+          code: 'MISSING_FIELDS',
+          message: 'Email, username, and password are required',
+        },
+      });
+    }
+
+    const user = await createUser(adminId, {
+      email,
+      username,
+      password,
+      role,
+      isActive,
+    });
+    
+    res.status(201).json({
+      message: 'User created successfully',
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT /api/admin/users/:id/password - Reset user password
+router.put('/users/:id/password', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.userId;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        error: {
+          code: 'MISSING_PASSWORD',
+          message: 'Password is required',
+        },
+      });
+    }
+
+    const result = await updateUserPassword(id, adminId, password);
+    
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

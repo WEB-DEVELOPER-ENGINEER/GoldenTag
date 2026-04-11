@@ -242,3 +242,191 @@ export const getAdminActionLogs = (userId?: string) => {
   }
   return adminActionLogs;
 };
+
+export const updateUser = async (userId: string, adminId: string, updateData: {
+  email?: string;
+  username?: string;
+  role?: 'USER' | 'ADMIN';
+  isActive?: boolean;
+}) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new AppError(404, 'USER_NOT_FOUND', 'User not found');
+  }
+
+  // Check if email is being changed and if it's already taken
+  if (updateData.email && updateData.email !== user.email) {
+    const existingEmail = await prisma.user.findUnique({
+      where: { email: updateData.email },
+    });
+    if (existingEmail) {
+      throw new AppError(409, 'EMAIL_EXISTS', 'Email is already in use');
+    }
+  }
+
+  // Check if username is being changed and if it's already taken
+  if (updateData.username && updateData.username !== user.username) {
+    const existingUsername = await prisma.user.findUnique({
+      where: { username: updateData.username },
+    });
+    if (existingUsername) {
+      throw new AppError(409, 'USERNAME_EXISTS', 'Username is already taken');
+    }
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+      lastLoginAt: true,
+    },
+  });
+
+  // Log admin action
+  adminActionLogs.push({
+    adminId,
+    action: 'UPDATE_USER',
+    targetUserId: userId,
+    timestamp: new Date(),
+  });
+
+  return updatedUser;
+};
+
+export const deleteUser = async (userId: string, adminId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new AppError(404, 'USER_NOT_FOUND', 'User not found');
+  }
+
+  // Prevent admin from deleting themselves
+  if (userId === adminId) {
+    throw new AppError(400, 'CANNOT_DELETE_SELF', 'You cannot delete your own account');
+  }
+
+  // Delete user (cascade will handle related records)
+  await prisma.user.delete({
+    where: { id: userId },
+  });
+
+  // Log admin action
+  adminActionLogs.push({
+    adminId,
+    action: 'DELETE_USER',
+    targetUserId: userId,
+    timestamp: new Date(),
+  });
+
+  return { success: true, message: 'User deleted successfully' };
+};
+
+export const createUser = async (adminId: string, userData: {
+  email: string;
+  username: string;
+  password: string;
+  role?: 'USER' | 'ADMIN';
+  isActive?: boolean;
+}) => {
+  const { email, username, password, role = 'USER', isActive = true } = userData;
+
+  // Check if email already exists
+  const existingEmail = await prisma.user.findUnique({
+    where: { email },
+  });
+  if (existingEmail) {
+    throw new AppError(409, 'EMAIL_EXISTS', 'Email is already in use');
+  }
+
+  // Check if username already exists
+  const existingUsername = await prisma.user.findUnique({
+    where: { username },
+  });
+  if (existingUsername) {
+    throw new AppError(409, 'USERNAME_EXISTS', 'Username is already taken');
+  }
+
+  // Hash password
+  const bcrypt = require('bcrypt');
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // Create user with profile
+  const user = await prisma.user.create({
+    data: {
+      email,
+      passwordHash,
+      username,
+      role,
+      isActive,
+      profile: {
+        create: {
+          displayName: username,
+          theme: {
+            create: {},
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+      lastLoginAt: true,
+    },
+  });
+
+  // Log admin action
+  adminActionLogs.push({
+    adminId,
+    action: 'CREATE_USER',
+    targetUserId: user.id,
+    timestamp: new Date(),
+  });
+
+  return user;
+};
+
+export const updateUserPassword = async (userId: string, adminId: string, newPassword: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new AppError(404, 'USER_NOT_FOUND', 'User not found');
+  }
+
+  // Hash new password
+  const bcrypt = require('bcrypt');
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash },
+  });
+
+  // Log admin action
+  adminActionLogs.push({
+    adminId,
+    action: 'RESET_PASSWORD',
+    targetUserId: userId,
+    timestamp: new Date(),
+  });
+
+  return { success: true, message: 'Password updated successfully' };
+};
