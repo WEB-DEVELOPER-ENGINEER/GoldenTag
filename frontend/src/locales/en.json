@@ -268,7 +268,12 @@
     "usage_1": "Download and add to business cards or marketing materials",
     "usage_2": "Display at events or on digital screens",
     "usage_3": "Anyone can scan with their phone camera to visit your profile",
-    "usage_4": "Updates automatically when you change your profile URL"
+    "usage_4": "Updates automatically when you change your profile URL",
+    "profile_link": "Profile Link",
+    "copy_link": "Copy Link",
+    "link_copied": "Link copied!",
+    "share": "Share",
+    "share_failed": "Failed to share"
   },
   "popup": {
     "title": "Popup Editor",

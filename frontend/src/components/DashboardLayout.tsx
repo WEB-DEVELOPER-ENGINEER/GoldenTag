@@ -38,7 +38,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, prev
 
             {/* Actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Language Selector */}
+              {/* Language Selector - Desktop */}
               <LanguageSelector 
                 variant="dropdown" 
                 showFlags={true} 
@@ -46,11 +46,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, prev
                 className="hidden sm:block"
               />
               
-              {/* Mobile Language Selector */}
+              {/* Language Selector - Mobile (Compact) */}
               <LanguageSelector 
                 variant="dropdown" 
                 showFlags={true} 
                 showLabels={false}
+                compact={true}
                 className="sm:hidden"
               />
 

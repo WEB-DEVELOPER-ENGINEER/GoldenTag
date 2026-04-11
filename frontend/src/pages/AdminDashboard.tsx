@@ -145,12 +145,22 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Language Selector - Desktop */}
               <LanguageSelector 
                 variant="dropdown" 
                 showFlags={true} 
                 showLabels={false}
+                className="hidden sm:block"
               />
-              <span className="text-sm text-gray-600">
+              {/* Language Selector - Mobile (Compact) */}
+              <LanguageSelector 
+                variant="dropdown" 
+                showFlags={true} 
+                showLabels={false}
+                compact={true}
+                className="sm:hidden"
+              />
+              <span className="text-sm text-gray-600 hidden sm:inline">
                 {user?.username} (Admin)
               </span>
               <button

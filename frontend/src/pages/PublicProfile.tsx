@@ -231,6 +231,7 @@ export const PublicProfile: React.FC = () => {
           variant="dropdown" 
           showFlags={true} 
           showLabels={false}
+          compact={true}
         />
       </div>
 

@@ -3,12 +3,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../hooks/useTranslation';
 
 export const QRCodeGenerator: React.FC = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { t } = useTranslation();
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Fetch QR code on component mount
   useEffect(() => {
@@ -91,6 +92,43 @@ export const QRCodeGenerator: React.FC = () => {
     fetchQRCode();
   };
 
+  const getProfileUrl = () => {
+    const baseUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin;
+    return `${baseUrl}/${user?.username}`;
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(getProfileUrl());
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      setError(t('qrcode.share_failed'));
+    }
+  };
+
+  const handleShare = async () => {
+    const profileUrl = getProfileUrl();
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${user?.username}'s Profile`,
+          text: `Check out my profile!`,
+          url: profileUrl,
+        });
+      } catch (err) {
+        // User cancelled or share failed
+        if ((err as Error).name !== 'AbortError') {
+          setError(t('qrcode.share_failed'));
+        }
+      }
+    } else {
+      // Fallback to copy
+      handleCopyLink();
+    }
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold text-ink-900 mb-3 tracking-tight">{t('qrcode.title')}</h2>
@@ -130,6 +168,55 @@ export const QRCodeGenerator: React.FC = () => {
               alt="Profile QR Code"
               className="w-full max-w-[256px] h-auto"
             />
+          </div>
+
+          {/* Profile Link Section */}
+          <div className="p-5 bg-ink-50 border border-ink-200 rounded-xl">
+            <h3 className="text-sm font-bold text-ink-900 mb-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-gold-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              {t('qrcode.profile_link')}
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={getProfileUrl()}
+                readOnly
+                className="flex-1 px-4 py-2.5 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCopyLink}
+                  className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-initial"
+                >
+                  {copySuccess ? (
+                    <>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{t('qrcode.link_copied')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      <span>{t('qrcode.copy_link')}</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-initial"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  <span>{t('qrcode.share')}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
         {/* Action Buttons */}

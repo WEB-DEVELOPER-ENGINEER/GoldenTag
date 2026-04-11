@@ -84,6 +84,7 @@ export const LoginForm: React.FC = () => {
           variant="dropdown" 
           showFlags={true} 
           showLabels={false}
+          compact={true}
         />
       </div>
 

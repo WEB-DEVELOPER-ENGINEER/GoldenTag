@@ -13,6 +13,7 @@ interface LanguageSelectorProps {
   className?: string;
   showFlags?: boolean;
   showLabels?: boolean;
+  compact?: boolean; // New prop for ultra-compact mobile design
 }
 
 /**
@@ -30,7 +31,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   variant = 'dropdown',
   className = '',
   showFlags = true,
-  showLabels = true
+  showLabels = true,
+  compact = false
 }) => {
   const { language, changeLanguage } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -88,6 +90,69 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
    * Render dropdown variant (default)
    */
   if (variant === 'dropdown') {
+    // Compact mobile-friendly design
+    if (compact) {
+      return (
+        <div className={`relative ${className}`} ref={dropdownRef}>
+          <button
+            ref={buttonRef}
+            onClick={() => setIsOpen(!isOpen)}
+            onKeyDown={handleKeyDown}
+            className="touch-target flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm border border-ink-200/50 rounded-full hover:bg-white hover:border-ink-300 hover:shadow-lg transition-all duration-200 focus:border-ink-400 focus:ring-2 focus:ring-ink-100"
+            aria-label="Select language"
+            aria-expanded={isOpen}
+            aria-haspopup="true"
+          >
+            <span className="text-lg" role="img" aria-label={currentConfig.name}>
+              {currentConfig.flag}
+            </span>
+          </button>
+
+          {isOpen && (
+            <div
+              className="absolute top-full mt-2 end-0 min-w-[180px] bg-white/95 backdrop-blur-md border border-ink-200/50 rounded-2xl shadow-2xl overflow-hidden z-50 animate-slide-down"
+              role="menu"
+              aria-orientation="vertical"
+            >
+              {Object.values(LANGUAGE_CONFIGS).map((config) => (
+                <button
+                  key={config.code}
+                  onClick={() => handleLanguageSelect(config.code)}
+                  className={`touch-target w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-ink-50/80 transition-colors duration-150 ${
+                    language === config.code ? 'bg-ink-50/80' : ''
+                  }`}
+                  role="menuitem"
+                  aria-label={`Switch to ${config.name}`}
+                >
+                  <span className="text-xl" role="img" aria-label={config.name}>
+                    {config.flag}
+                  </span>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-ink-900">
+                      {config.nativeName}
+                    </div>
+                    <div className="text-xs text-ink-500">{config.name}</div>
+                  </div>
+                  {language === config.code && (
+                    <svg
+                      className="w-5 h-5 text-gold-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Standard dropdown design
     return (
       <div className={`relative ${className}`} ref={dropdownRef}>
         <button
